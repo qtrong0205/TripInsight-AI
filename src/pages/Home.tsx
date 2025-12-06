@@ -5,7 +5,7 @@ import { Compass, Mountain, Building2, Palmtree, Landmark, TreePine } from 'luci
 import CategoryChip from '../components/CategoryChip';
 import DestinationCard from '../components/DestinationCard';
 import Sidebar, { FilterState } from '../components/Sidebar';
-import { destinations } from '../data/destinations';
+import { Destination } from '../data/destinations';
 
 const categories = [
     { label: 'All', icon: <Compass className="w-4 h-4" strokeWidth={2} /> },
@@ -26,10 +26,32 @@ export default function Home() {
     });
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
+    const [destinations, setDestinations] = useState<Destination[]>([]);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
+
     const searchQuery = searchParams.get('search') || '';
 
     useEffect(() => {
         window.scrollTo(0, 0);
+    }, []);
+
+    useEffect(() => {
+        const getLocations = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+                const res = await fetch('http://localhost:3000/api/locations');
+                if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
+                const data = await res.json();
+                setDestinations(data as Destination[]);
+            } catch (e: any) {
+                setError(e?.message || 'Failed to load destinations');
+            } finally {
+                setLoading(false);
+            }
+        };
+        getLocations();
     }, []);
 
     const filteredDestinations = destinations.filter((dest) => {
@@ -117,8 +139,13 @@ export default function Home() {
                             {filteredDestinations.length} destination{filteredDestinations.length !== 1 ? 's' : ''}
                         </p>
                     </div>
-
-                    {filteredDestinations.length > 0 ? (
+                    {loading && (
+                        <div className="text-center py-12 text-muted-foreground">Loading destinations…</div>
+                    )}
+                    {error && (
+                        <div className="text-center py-12 text-destructive">{error}</div>
+                    )}
+                    {!loading && !error && filteredDestinations.length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             {filteredDestinations.map((destination) => (
                                 <DestinationCard key={destination.id} destination={destination} />
