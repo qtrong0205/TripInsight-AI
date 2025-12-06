@@ -1,0 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+img,
+video {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+.no-horizontal-overflow {
+    overflow-x: hidden;
+}
+
+@layer base {
+    :root {
+        --background: 0 0% 100%;
+        --foreground: 219 33% 20%;
+
+        --card: 0 0% 100%;
+        --card-foreground: 219 33% 20%;
+
+        --popover: 0 0% 100%;
+        --popover-foreground: 219 33% 20%;
+
+        --primary: 210 90% 56%;
+        --primary-foreground: 0 0% 100%;
+
+        --secondary: 210 84% 44%;
+        --secondary-foreground: 0 0% 100%;
+
+        --tertiary: 31 95% 58%;
+        --tertiary-foreground: 0 0% 100%;
+
+        --neutral: 0 0% 98%;
+        --neutral-foreground: 219 33% 20%;
+
+        --muted: 220 20% 93%;
+        --muted-foreground: 218 10% 40%;
+
+        --accent: 31 95% 58%;
+        --accent-foreground: 0 0% 100%;
+
+        --destructive: 0 84% 60%;
+        --destructive-foreground: 0 0% 100%;
+
+        --border: 220 20% 93%;
+        --input: 220 20% 93%;
+        --ring: 210 84% 44%;
+
+        --success: 148 50% 42%;
+        --warning: 36 100% 45%;
+
+        --radius: 1rem;
+    }
+
+    * {
+        @apply border-border;
+    }
+
+    html,
+    body {
+        @apply bg-background text-foreground;
+    }
+}
+
+@layer utilities {
+    .text-balance {
+        text-wrap: balance;
+    }
+}
