@@ -22,6 +22,12 @@ export default function DestinationCard({ destination }: DestinationCardProps) {
         }
     };
 
+    const getSentimentColor = (score: number) => {
+        if (score >= 75) return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400';
+        if (score >= 50) return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400';
+        return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400';
+    };
+
     return (
         <Card className="overflow-hidden sm:hover:shadow-lg transition-shadow duration-200 bg-card border-border group">
             <Link to={`/destination/${destination.slug}`}>
@@ -58,6 +64,12 @@ export default function DestinationCard({ destination }: DestinationCardProps) {
                         <div className="flex items-center text-muted-foreground text-xs sm:text-sm mt-1">
                             <MapPin className="w-4 h-4 mr-1 shrink-0" strokeWidth={2} />
                             {destination.location}
+                        </div>
+                        <div className="flex justify-start items-center gap-3 my-1">
+                            <span className="text-gray-600 dark:text-gray-400">AI Sentiment Score</span>
+                            <div className={`px-2 py-1 rounded-full ${getSentimentColor(destination.sentimentScore)}`}>
+                                <span className="text-lg">{destination.sentimentScore}</span>
+                            </div>
                         </div>
                     </div>
                     <div className="flex items-center justify-between">
