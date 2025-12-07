@@ -1,7 +1,10 @@
 import { destinations } from "../../data/location"
+import { locationModel } from "./location.model";
 
 export const locationService = {
-    getAllLocations: () => {
-        return destinations
+    getAllLocations: async () => {
+        const data = await locationModel.getAllLocations();
+        if (!data) throw new Error('Failed to fetch');
+        return data;
     }
 }
