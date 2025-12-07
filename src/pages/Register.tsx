@@ -4,13 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/useAuth';
 
 export default function Register() {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const { login, user } = useAuth();
+    const { register, user } = useAuth();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -20,11 +20,15 @@ export default function Register() {
         }
     }, [user, navigate]);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Mock register: reuse login to set a user session
-        login(email, password);
-        navigate('/');
+        try {
+            await register(name, email, password);
+            navigate('/');
+        } catch (err: any) {
+            // TODO: surface error to user via toast/UI
+            console.error('Register failed:', err?.message || err);
+        }
     };
 
     return (

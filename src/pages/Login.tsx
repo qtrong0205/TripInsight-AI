@@ -4,11 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/useAuth';
 
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const { login, user } = useAuth();
     const navigate = useNavigate();
 
@@ -19,10 +21,18 @@ export default function Login() {
         }
     }, [user, navigate]);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        login(email, password);
-        navigate('/');
+        setErrorMsg(null);
+        setSubmitting(true);
+        try {
+            await login(email, password);
+            navigate('/');
+        } catch (err: any) {
+            setErrorMsg(err?.message || 'Login failed. Please check your credentials.');
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
@@ -45,6 +55,7 @@ export default function Login() {
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
                                 className="bg-background text-foreground border-border"
+                                disabled={submitting}
                             />
                         </div>
                         <div className="space-y-2">
@@ -57,13 +68,18 @@ export default function Login() {
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
                                 className="bg-background text-foreground border-border"
+                                disabled={submitting}
                             />
                         </div>
+                        {errorMsg && (
+                            <p className="text-sm text-red-600">{errorMsg}</p>
+                        )}
                         <Button
                             type="submit"
                             className="w-full bg-primary text-primary-foreground hover:bg-secondary"
+                            disabled={submitting}
                         >
-                            Login
+                            {submitting ? 'Logging in…' : 'Login'}
                         </Button>
                     </form>
                 </CardContent>

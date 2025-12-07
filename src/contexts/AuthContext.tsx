@@ -1,48 +1,99 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { useState, useEffect, ReactNode } from 'react';
+import { supabase } from '../lib/supabase';
+import { AuthContext, User, AuthContextType } from './ContextBase';
 
-interface User {
-    id: string;
-    name: string;
-    email: string;
-    avatar: string;
-}
-
-interface AuthContextType {
-    user: User | null;
-    login: (email: string, password: string) => void;
-    logout: () => void;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// Types are imported from ContextBase to avoid duplicate interface declarations
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
+    // Initialize session from Supabase on mount
+    useEffect(() => {
+        const init = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            const sUser = session?.user;
+            if (sUser) {
+                setUser({
+                    id: sUser.id,
+                    name: sUser.user_metadata?.name ?? sUser.email ?? 'User',
+                    email: sUser.email ?? '',
+                    avatar: sUser.user_metadata?.avatar ?? 'https://avatar.iran.liara.run/public/4',
+                    createdAt: sUser.created_at,
+                });
+            }
+        };
+        init();
 
-    const login = (email: string, password: string) => {
-        // Mock login - in real app would validate credentials
-        setUser({
-            id: '1',
-            name: 'John Traveler',
-            email: email,
-            avatar: 'https://placehold.co/100x100',
+        const { data: authSub } = supabase.auth.onAuthStateChange((_event, session) => {
+            const sUser = session?.user;
+            if (sUser) {
+                setUser({
+                    id: sUser.id,
+                    name: sUser.user_metadata?.name ?? sUser.email ?? 'User',
+                    email: sUser.email ?? '',
+                    avatar: sUser.user_metadata?.avatar ?? 'https://avatar.iran.liara.run/public/4',
+                    createdAt: sUser.created_at,
+                });
+            } else {
+                setUser(null);
+            }
         });
+
+        return () => {
+            authSub?.subscription?.unsubscribe();
+        };
+    }, []);
+
+    const login = async (email: string, password: string) => {
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+        });
+        if (error) throw error;
+        const sUser = data.user;
+        if (sUser) {
+            setUser({
+                id: sUser.id,
+                name: sUser.user_metadata?.name ?? sUser.email ?? 'User',
+                email: sUser.email ?? email,
+                avatar: sUser.user_metadata?.avatar ?? 'https://avatar.iran.liara.run/public/4',
+                createdAt: sUser.created_at,
+            });
+        }
     };
 
-    const logout = () => {
+    const register = async (name: string, email: string, password: string) => {
+        const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+                data: { name },
+            },
+        });
+
+
+
+        if (error) throw error;
+        const sUser = data.user;
+        if (sUser) {
+            setUser({
+                id: sUser.id,
+                name: (name && name.trim()) || sUser.email || 'User',
+                email: sUser.email ?? email,
+                avatar: sUser.user_metadata?.avatar ?? 'https://avatar.iran.liara.run/public/4',
+                createdAt: sUser.created_at,
+            });
+        }
+    };
+
+    const logout = async () => {
+        await supabase.auth.signOut();
         setUser(null);
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout }}>
+        <AuthContext.Provider value={{ user, login, register, logout }}>
             {children}
         </AuthContext.Provider>
     );
 }
 
-export function useAuth() {
-    const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error('useAuth must be used within AuthProvider');
-    }
-    return context;
-}

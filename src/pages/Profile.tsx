@@ -1,11 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Mail, MapPin, Calendar } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/useAuth';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { destinations } from '../data/destinations';
 
@@ -20,6 +20,14 @@ export default function Profile() {
             navigate('/login');
         }
     }, [user, navigate]);
+
+    const memberSince = useMemo(() => {
+        if (!user?.createdAt) return '—';
+        const d = new Date(user.createdAt);
+        // Format month + year in English locale and capitalize first letter
+        const formatted = d.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+        return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+    }, [user?.createdAt]);
 
     if (!user) {
         return null;
@@ -83,7 +91,7 @@ export default function Profile() {
                                     <Calendar className="w-5 h-5 text-primary" strokeWidth={2} />
                                     <div>
                                         <div className="text-sm text-muted-foreground">Member Since</div>
-                                        <div className="font-medium text-card-foreground">January 2024</div>
+                                        <div className="font-medium text-card-foreground">{memberSince}</div>
                                     </div>
                                 </div>
                             </CardContent>
