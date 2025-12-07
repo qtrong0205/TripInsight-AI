@@ -27,10 +27,12 @@ export default function DestinationCard({ destination }: DestinationCardProps) {
         if (score >= 50) return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400';
         return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400';
     };
-
     return (
-        <Card className="overflow-hidden sm:hover:shadow-lg transition-shadow duration-200 bg-card border-border group">
-            <Link to={`/destination/${destination.slug}`}>
+        <Card
+            className="overflow-hidden sm:hover:shadow-lg transition-shadow duration-200 bg-card border-border group">
+            <Link
+                to={`/destination/${destination.slug}${destination.place_id ? `?place_id=${encodeURIComponent(String(destination.place_id))}` : ''}`}
+            >
                 <div className="relative">
                     <img
                         src={destination.image && 'https://c.animaapp.com/mir59zn4CW2nTa/img/ai_1.png'}

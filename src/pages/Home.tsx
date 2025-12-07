@@ -83,7 +83,6 @@ export default function Home() {
     //     return true;
     // });
 
-    console.log(destinations)
     return (
         <div className="flex flex-col md:flex-row max-w-screen-2xl min-h-screen bg-background">
             {/* Sidebar */}

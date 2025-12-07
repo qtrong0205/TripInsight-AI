@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { MapPin, Star, Heart, Clock, DollarSign, Users, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,17 +8,48 @@ import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import ReviewCard from '../components/ReviewCard';
 import DestinationCard from '../components/DestinationCard';
-import { destinations } from '../data/destinations';
+import type { Destination } from '../data/destinations';
 import { useFavorites } from '../contexts/FavoritesContext';
 
 export default function DestinationDetails() {
     const [rating, setRating] = useState(0);
+    const [destination, setDestination] = useState<Destination | null>(null);
+    const [similarDestinations, setSimilarDestinations] = useState<Destination[]>([]);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
+    const location = useLocation();
     const { slug } = useParams<{ slug: string }>();
     const navigate = useNavigate();
     const { favorites, addFavorite, removeFavorite } = useFavorites();
     const [newReview, setNewReview] = useState('');
 
-    const destination = destinations.find((d) => d.slug === slug);
+    useEffect(() => {
+        const getLocationByID = async () => {
+            try {
+                const params = new URLSearchParams(location.search);
+                const placeId = params.get('place_id');
+                setLoading(true);
+                setError(null);
+                if (!placeId) {
+                    throw new Error('Missing place_id in URL');
+                }
+                const res = await fetch(`http://localhost:3000/api/locations/${placeId}`);
+                if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
+                const data = await res.json();
+                setDestination((data?.data ?? data) as Destination);
+
+                // Optionally fetch similar destinations from backend
+                // const simRes = await fetch(`http://localhost:3000/api/locations?similarTo=${placeId}&limit=4`);
+                // const simData = await simRes.json();
+                // setSimilarDestinations((simData?.data ?? simData) as Destination[]);
+            } catch (e: any) {
+                setError(e?.message || 'Failed to load destinations');
+            } finally {
+                setLoading(false);
+            }
+        }
+        getLocationByID()
+    }, [location.search])
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -27,6 +58,19 @@ export default function DestinationDetails() {
     const handleRatingChange = (newRating: number) => {
         setRating(newRating);
     };
+    console.log(destination)
+
+    if (loading) {
+        return (
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center text-muted-foreground">Loading destination…</div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center text-destructive">{error}</div>
+        );
+    }
 
     if (!destination) {
         return (
@@ -44,9 +88,6 @@ export default function DestinationDetails() {
     }
 
     const isFavorite = favorites.includes(destination.id);
-    const similarDestinations = destinations
-        .filter((d) => d.id !== destination.id && d.categories.some((cat) => destination.categories.includes(cat)))
-        .slice(0, 4);
 
     const handleFavoriteClick = () => {
         if (isFavorite) {
@@ -58,7 +99,6 @@ export default function DestinationDetails() {
 
     const handleReviewSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        // In a real app, this would submit to an API
         setNewReview('');
         alert('Thank you for your review!');
     };
@@ -194,11 +234,11 @@ export default function DestinationDetails() {
                         {/* Reviews Section */}
                         <div>
                             <h2 className="text-2xl font-bold text-foreground mb-6">Reviews</h2>
-                            <div className="space-y-4 mb-8">
+                            {/* <div className="space-y-4 mb-8">
                                 {destination.reviewsList.map((review) => (
                                     <ReviewCard key={review.id} review={review} />
                                 ))}
-                            </div>
+                            </div> */}
 
                             {/* Write Review */}
                             <Card className="bg-card border-border">
