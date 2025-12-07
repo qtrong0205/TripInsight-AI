@@ -1,4 +1,3 @@
-import { destinations } from "../../data/location"
 import { locationModel } from "./location.model";
 
 export const locationService = {
