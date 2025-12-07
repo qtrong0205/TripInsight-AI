@@ -9,5 +9,14 @@ export const locationController = {
         } catch (error: any) {
             res.status(400).json({ success: false, message: error.message });
         }
+    },
+    getLocationById: async (req: Request, res: Response) => {
+        try {
+            const id = req.params.id;
+            const location = await locationService.getLocationById(id);
+            res.status(200).json({ success: true, data: location });
+        } catch (error: any) {
+            res.status(400).json({ success: false, message: error.message });
+        }
     }
 }
