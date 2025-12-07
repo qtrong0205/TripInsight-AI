@@ -33,7 +33,7 @@ export default function DestinationCard({ destination }: DestinationCardProps) {
             <Link to={`/destination/${destination.slug}`}>
                 <div className="relative">
                     <img
-                        src={destination.image}
+                        src={destination.image && 'https://c.animaapp.com/mir59zn4CW2nTa/img/ai_1.png'}
                         alt={destination.name}
                         className="w-full h-40 sm:h-48 md:h-56 object-cover object-center"
                         loading="lazy"
@@ -67,8 +67,8 @@ export default function DestinationCard({ destination }: DestinationCardProps) {
                         </div>
                         <div className="flex justify-start items-center gap-3 my-1">
                             <span className="text-gray-600 dark:text-gray-400">AI Sentiment Score</span>
-                            <div className={`px-2 py-1 rounded-full ${getSentimentColor(destination.sentimentScore)}`}>
-                                <span className="text-lg">{destination.sentimentScore}</span>
+                            <div className={`px-2 py-1 rounded-full ${getSentimentColor(destination.avg_sentiment_score)}`}>
+                                <span className="text-lg">{destination.avg_sentiment_score}</span>
                             </div>
                         </div>
                     </div>
@@ -77,10 +77,6 @@ export default function DestinationCard({ destination }: DestinationCardProps) {
                             <Star className="w-4 h-4 text-tertiary" strokeWidth={2} fill="currentColor" />
                             <span className="font-medium text-card-foreground">{destination.rating}</span>
                             <span className="text-muted-foreground">({destination.reviews})</span>
-                        </div>
-                        <div className="text-right">
-                            <div className="text-base sm:text-lg font-bold text-card-foreground">${destination.price}</div>
-                            <div className="text-[10px] sm:text-xs text-muted-foreground">per person</div>
                         </div>
                     </div>
                 </CardContent>

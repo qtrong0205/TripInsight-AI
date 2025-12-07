@@ -44,7 +44,7 @@ export default function Home() {
                 const res = await fetch('http://localhost:3000/api/locations');
                 if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
                 const data = await res.json();
-                setDestinations(data as Destination[]);
+                setDestinations(data.data as Destination[]);
             } catch (e: any) {
                 setError(e?.message || 'Failed to load destinations');
             } finally {
@@ -54,35 +54,36 @@ export default function Home() {
         getLocations();
     }, []);
 
-    const filteredDestinations = destinations.filter((dest) => {
-        // Search filter
-        if (searchQuery && !dest.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-            !dest.location.toLowerCase().includes(searchQuery.toLowerCase())) {
-            return false;
-        }
+    // const destinations = destinations.filter((dest) => {
+    //     // Search filter
+    //     if (searchQuery && !dest.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+    //         !dest.location.toLowerCase().includes(searchQuery.toLowerCase())) {
+    //         return false;
+    //     }
 
-        // Category filter
-        if (selectedCategory !== 'All' && !dest.categories.includes(selectedCategory)) {
-            return false;
-        }
+    //     // Category filter
+    //     if (selectedCategory !== 'All' && !dest.categories.includes(selectedCategory)) {
+    //         return false;
+    //     }
 
-        // Sidebar filters
-        if (filters.categories.length > 0) {
-            const hasCategory = filters.categories.some((cat) => dest.categories.includes(cat));
-            if (!hasCategory) return false;
-        }
+    //     // Sidebar filters
+    //     if (filters.categories.length > 0) {
+    //         const hasCategory = filters.categories.some((cat) => dest.categories.includes(cat));
+    //         if (!hasCategory) return false;
+    //     }
 
-        if (dest.price < filters.priceRange[0] || dest.price > filters.priceRange[1]) {
-            return false;
-        }
+    //     if (dest.price < filters.priceRange[0] || dest.price > filters.priceRange[1]) {
+    //         return false;
+    //     }
 
-        if (dest.rating < filters.rating) {
-            return false;
-        }
+    //     if (dest.rating < filters.rating) {
+    //         return false;
+    //     }
 
-        return true;
-    });
+    //     return true;
+    // });
 
+    console.log(destinations)
     return (
         <div className="flex flex-col md:flex-row max-w-screen-2xl min-h-screen bg-background">
             {/* Sidebar */}
@@ -136,7 +137,7 @@ export default function Home() {
                             {searchQuery ? `Search Results for "${searchQuery}"` : 'Popular Destinations'}
                         </h2>
                         <p className="text-muted-foreground">
-                            {filteredDestinations.length} destination{filteredDestinations.length !== 1 ? 's' : ''}
+                            {destinations.length} destination{destinations.length !== 1 ? 's' : ''}
                         </p>
                     </div>
                     {loading && (
@@ -145,9 +146,9 @@ export default function Home() {
                     {error && (
                         <div className="text-center py-12 text-destructive">{error}</div>
                     )}
-                    {!loading && !error && filteredDestinations.length > 0 ? (
+                    {!loading && !error && destinations.length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            {filteredDestinations.map((destination) => (
+                            {destinations.map((destination) => (
                                 <DestinationCard key={destination.id} destination={destination} />
                             ))}
                         </div>
