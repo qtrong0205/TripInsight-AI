@@ -34,24 +34,51 @@ interface WikiSummary {
     extract?: string;
 }
 
-// ==================== HÀM XỬ LÝ DỮ LIỆU MỚI =====================
+// ==================== LOCATION NORMALIZATION =====================
+function simplifyLocation(formatted: string): string {
+    if (!formatted) return "";
+    const tokens = formatted
+        .split(",")
+        .map(t => t.trim())
+        .filter(t => t.length > 0);
 
-/**
- * 🧹 Hàm xử lý Categories: Chỉ giữ lại chữ thường (a-z) và khoảng trắng
- * @param categories Mảng chuỗi categories từ Geoapify
- * @returns Mảng chuỗi categories đã được làm sạch
- */
+    // Loại bỏ các token không mong muốn
+    const blacklist = [/street/i, /district/i, /ward/i, /province/i, /city/i];
+    const cleaned = tokens.filter(t => {
+        const hasDigit = /\d/.test(t);
+        const isBlack = blacklist.some(rx => rx.test(t));
+        return !hasDigit && !isBlack;
+    });
+
+    // Lấy quốc gia là token cuối cùng sau khi lọc (nếu có)
+    const country = (cleaned[cleaned.length - 1] ?? tokens[tokens.length - 1] ?? "").replace(/\.$/, "");
+    // Thành phố: tìm token gần cuối còn lại (ví dụ: Hanoi)
+    const cityCandidates = cleaned.slice(0, -1);
+    const city = (cityCandidates[cityCandidates.length - 1] ?? "").replace(/\.$/, "");
+
+    const parts = [city, country].filter(Boolean);
+    // Return in "City, Country" format 
+    return parts.join(", ").trim();
+}
+
+// ==================== HÀM XỬ LÝ DỮ LIỆU MỚI =====================
 function processCategories(categories: string[]): string[] {
     if (!categories || categories.length === 0) return [];
 
-    // Regex để loại bỏ tất cả ký tự không phải chữ thường (a-z) hoặc khoảng trắng
-    // Sau đó loại bỏ các khoảng trắng thừa
     const regex = /[^a-z\s]/g;
 
-    return categories
+    const cleaned = categories
         .map(cat => cat.toLowerCase().replace(regex, '').trim()) // Lọc ký tự, chuyển thành chữ thường, cắt khoảng trắng
-        .filter(cat => cat.length > 0) // Loại bỏ chuỗi rỗng sau khi làm sạch
-        .filter((cat, index, self) => self.indexOf(cat) === index); // Loại bỏ các categories trùng lặp
+        .filter(cat => cat.length > 0);
+
+    // Tách các cụm thành từng từ và viết hoa chữ cái đầu
+    const words = cleaned
+        .flatMap(cat => cat.split(/\s+/)) // tách theo khoảng trắng
+        .filter(w => w.length > 0)
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1));
+
+    // Loại bỏ trùng lặp, giữ thứ tự xuất hiện
+    return words.filter((w, idx, self) => self.indexOf(w) === idx);
 }
 
 /**
@@ -64,6 +91,16 @@ function generateRandomRating(): number {
     // Làm tròn đến 1 chữ số thập phân
     const randomRating = Math.random() * (max - min) + min;
     return parseFloat(randomRating.toFixed(1));
+}
+
+/**
+ * 🎯 Tạo điểm cảm xúc (sentiment) ngẫu nhiên trong khoảng 75-100
+ */
+function generateRandomSentiment(): number {
+    const min = 75;
+    const max = 100;
+    const value = Math.random() * (max - min) + min;
+    return Math.round(value);
 }
 
 
@@ -168,12 +205,12 @@ async function buildPlaceData(name: string) {
     const data = {
         name: finalProps.name ?? name,
         slug: (finalProps.name ?? name).toLowerCase().replace(/\s+/g, "-"),
-        location: finalProps.formatted,
+        location: simplifyLocation(finalProps.formatted),
         image: images,
-        rating: rating, // <--- ĐIỀN RATING
-        categories: categories, // <--- ĐIỀN CATEGORIES ĐÃ XỬ LÝ
+        rating: rating,
+        categories: categories,
         description: wiki?.extract ?? "",
-        avg_sentiment_score: null,
+        avg_sentiment_score: generateRandomSentiment(),
         lat,
         lon,
         embed_map_url: embedMapUrl,
@@ -218,8 +255,6 @@ async function run() {
         "Hue Imperial City",
         "Cat Ba Island",
         "Sapa Terraced Fields",
-
-        // === Địa điểm Quốc tế (International Destinations) ===
         "Eiffel Tower",
         "Colosseum",
         "Statue of Liberty",
