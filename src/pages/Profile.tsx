@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { User, Mail, MapPin, Calendar } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -53,12 +53,14 @@ export default function Profile() {
                                 </Avatar>
                                 <h2 className="text-2xl font-bold text-card-foreground mb-2">{user.name}</h2>
                                 <p className="text-muted-foreground mb-6">{user.email}</p>
-                                <Button
-                                    variant="outline"
-                                    className="w-full bg-background text-foreground border-border hover:bg-neutral hover:text-foreground"
-                                >
-                                    Edit Profile
-                                </Button>
+                                <Link to={"/edit-profile"}>
+                                    <Button
+                                        variant="outline"
+                                        className="w-full bg-background text-foreground border-border hover:bg-neutral hover:text-foreground"
+                                    >
+                                        Edit Profile
+                                    </Button>
+                                </Link>
                             </CardContent>
                         </Card>
                     </div>

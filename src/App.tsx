@@ -8,6 +8,7 @@ import Favorites from './pages/Favorites';
 import Login from './pages/Login';
 import Profile from './pages/Profile';
 import Register from './pages/Register';
+import EditProfile from './pages/UpdateProfile';
 
 function App() {
     return (
@@ -22,6 +23,7 @@ function App() {
                             <Route path="/login" element={<Login />} />
                             <Route path="/register" element={<Register />} />
                             <Route path="/profile" element={<Profile />} />
+                            <Route path="/edit-profile" element={<EditProfile />} />
                         </Routes>
                     </AppShell>
                 </FavoritesProvider>
