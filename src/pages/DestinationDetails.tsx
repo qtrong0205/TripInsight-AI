@@ -10,46 +10,22 @@ import ReviewCard from '../components/ReviewCard';
 import DestinationCard from '../components/DestinationCard';
 import type { Destination } from '../data/destinations';
 import { useFavorites } from '../contexts/FavoritesContext';
+import { useLocationQuery } from '../hooks/location.queries';
 
 export default function DestinationDetails() {
     const [rating, setRating] = useState(0);
-    const [destination, setDestination] = useState<Destination | null>(null);
+    // We'll derive destination from the React Query data instead of local state
     const [similarDestinations, setSimilarDestinations] = useState<Destination[]>([]);
-    const [loading, setLoading] = useState<boolean>(false);
-    const [error, setError] = useState<string | null>(null);
     const location = useLocation();
     const { slug } = useParams<{ slug: string }>();
     const navigate = useNavigate();
     const { favorites, addFavorite, removeFavorite } = useFavorites();
     const [newReview, setNewReview] = useState('');
 
-    useEffect(() => {
-        const getLocationByID = async () => {
-            try {
-                const params = new URLSearchParams(location.search);
-                const placeId = params.get('place_id');
-                setLoading(true);
-                setError(null);
-                if (!placeId) {
-                    throw new Error('Missing place_id in URL');
-                }
-                const res = await fetch(`http://localhost:3000/api/locations/${placeId}`);
-                if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
-                const data = await res.json();
-                setDestination((data?.data ?? data) as Destination);
-
-                // Optionally fetch similar destinations from backend
-                // const simRes = await fetch(`http://localhost:3000/api/locations?similarTo=${placeId}&limit=4`);
-                // const simData = await simRes.json();
-                // setSimilarDestinations((simData?.data ?? simData) as Destination[]);
-            } catch (e: any) {
-                setError(e?.message || 'Failed to load destinations');
-            } finally {
-                setLoading(false);
-            }
-        }
-        getLocationByID()
-    }, [location.search])
+    const params = new URLSearchParams(location.search);
+    const placeId = params.get('place_id');
+    const { data, isLoading, error } = useLocationQuery(placeId);
+    const destination = (data as Destination | undefined);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -58,7 +34,7 @@ export default function DestinationDetails() {
     const handleRatingChange = (newRating: number) => {
         setRating(newRating);
     };
-    if (loading) {
+    if (isLoading) {
         return (
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center text-muted-foreground">Loading destination…</div>
         );
@@ -66,7 +42,7 @@ export default function DestinationDetails() {
 
     if (error) {
         return (
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center text-destructive">{error}</div>
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center text-destructive">{(error as Error)?.message || String(error)}</div>
         );
     }
 
