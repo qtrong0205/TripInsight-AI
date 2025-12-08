@@ -11,14 +11,14 @@ interface DestinationCardProps {
 
 export default function DestinationCard({ destination }: DestinationCardProps) {
     const { favorites, addFavorite, removeFavorite } = useFavorites();
-    const isFavorite = favorites.includes(destination.id);
+    const isFavorite = favorites.includes(destination.place_id);
 
     const handleFavoriteClick = (e: React.MouseEvent) => {
         e.preventDefault();
         if (isFavorite) {
-            removeFavorite(destination.id);
+            removeFavorite(destination.place_id);
         } else {
-            addFavorite(destination.id);
+            addFavorite(destination.place_id);
         }
     };
 
