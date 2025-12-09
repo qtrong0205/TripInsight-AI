@@ -31,9 +31,22 @@ export default function DestinationDetails() {
         window.scrollTo(0, 0);
     }, [slug]);
 
+    console.log(destination)
+
     const handleRatingChange = (newRating: number) => {
         setRating(newRating);
     };
+
+    const staticMapUrl = `
+  https://maps.geoapify.com/v1/staticmap?
+  style=osm-carto&
+  center=lonlat:${destination?.lon},${destination?.lat}&
+  zoom=14&
+  width=600&
+  height=300&
+  apiKey=${import.meta.env.VITE_GEOAPIFY_KEY}
+`.replace(/\s+/g, '');
+
     if (isLoading) {
         return (
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center text-muted-foreground">Loading destination…</div>
@@ -270,7 +283,7 @@ export default function DestinationDetails() {
                         <Card className="bg-card border-border overflow-hidden">
                             <CardContent className="p-0">
                                 <iframe
-                                    src={`https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=${encodeURIComponent(destination.location)}`}
+                                    src={staticMapUrl}
                                     width="100%"
                                     height="300"
                                     style={{ border: 0 }}

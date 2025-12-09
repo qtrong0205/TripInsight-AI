@@ -16,10 +16,13 @@ export interface Destination {
     price: number;
     rating: number;
     reviews: number;
+    lat: number;
+    lon: number;
     categories: string[];
     description: string;
     duration: string;
     reviewsList: Review[];
+    embed_map_url: string
 }
 
 export const destinations: Destination[] = [
