@@ -50,13 +50,17 @@ export default function DestinationDetails() {
 
     if (isLoading) {
         return (
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center text-muted-foreground">Loading destination…</div>
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center text-muted-foreground">
+                Loading destination…
+            </div>
         );
     }
 
     if (error) {
         return (
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center text-destructive">{(error as Error)?.message || String(error)}</div>
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center text-destructive">
+                {(error as Error)?.message || String(error)}
+            </div>
         );
     }
 
