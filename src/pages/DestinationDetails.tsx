@@ -14,8 +14,6 @@ import { useLocationQuery } from '../hooks/location.queries';
 
 export default function DestinationDetails() {
     const [rating, setRating] = useState(0);
-    // We'll derive destination from the React Query data instead of local state
-    const [similarDestinations, setSimilarDestinations] = useState<Destination[]>([]);
     const location = useLocation();
     const { slug } = useParams<{ slug: string }>();
     const navigate = useNavigate();
@@ -25,13 +23,16 @@ export default function DestinationDetails() {
     const params = new URLSearchParams(location.search);
     const placeId = params.get('place_id');
     const { data, isLoading, error } = useLocationQuery(placeId);
-    const destination = (data as Destination | undefined);
+    const destination = (data?.location?.data as Destination | undefined);
+    const similar: Destination[] = Array.isArray(data?.similar?.data)
+        ? (data!.similar.data as Destination[])
+        : Array.isArray(data?.similar)
+            ? (data!.similar as Destination[])
+            : [];
 
     useEffect(() => {
         window.scrollTo(0, 0);
     }, [slug]);
-
-    console.log(destination)
 
     const handleRatingChange = (newRating: number) => {
         setRating(newRating);
@@ -318,12 +319,12 @@ export default function DestinationDetails() {
             </section>
 
             {/* Similar Destinations */}
-            {similarDestinations.length > 0 && (
+            {similar.length > 0 && (
                 <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 bg-neutral">
                     <h2 className="text-3xl font-bold text-foreground mb-8">Similar Destinations</h2>
                     <ScrollArea className="w-full">
                         <div className="flex space-x-6 pb-4">
-                            {similarDestinations.map((dest) => (
+                            {similar.map((dest: Destination) => (
                                 <div key={dest.id} className="w-80 flex-shrink-0">
                                     <DestinationCard destination={dest} />
                                 </div>
