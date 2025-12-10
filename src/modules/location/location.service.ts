@@ -11,5 +11,11 @@ export const locationService = {
         const data = await locationModel.getLocationById(id)
         if (!data) throw new Error('Failed to fetch');
         return data;
+    },
+    getSimilarLocations: async (id: string) => {
+        if (!id) throw new Error('Place id is required');
+        const data = await locationModel.getSimilarLocations(id)
+        if (!data) throw new Error('Failed to fetch');
+        return data;
     }
 }
