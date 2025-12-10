@@ -35,7 +35,7 @@ export default function DestinationCard({ destination }: DestinationCardProps) {
             >
                 <div className="relative">
                     <img
-                        src={destination.image && 'https://c.animaapp.com/mir59zn4CW2nTa/img/ai_1.png'}
+                        src={destination.image[0]}
                         alt={destination.name}
                         className="w-full h-40 sm:h-48 md:h-56 object-cover object-center"
                         loading="lazy"

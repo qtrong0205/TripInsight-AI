@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
-import { MapPin, Star, Heart, Clock, DollarSign, Users, ArrowLeft } from 'lucide-react';
+import { MapPin, Star, Heart, Clock, Brain, Users, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -109,23 +109,23 @@ export default function DestinationDetails() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                     <div className="lg:col-span-2">
                         <img
-                            src={destination.image}
+                            src={destination.image[0]}
                             alt={destination.name}
-                            className="w-full h-96 lg:h-[500px] object-cover rounded-lg"
+                            className="w-full max-w-full h-64 sm:h-80 lg:h-[420px] xl:h-[480px] object-cover rounded-lg mx-auto"
                             loading="eager"
                         />
                     </div>
                     <div className="hidden lg:grid grid-rows-2 gap-4">
                         <img
-                            src={destination.image}
+                            src={destination.image[1]}
                             alt={`${destination.name} view 2`}
-                            className="w-full h-full object-cover rounded-lg"
+                            className="w-full max-w-full h-[200px] xl:h-[230px] object-cover rounded-lg"
                             loading="lazy"
                         />
                         <img
-                            src={destination.image}
+                            src={destination.image[2]}
                             alt={`${destination.name} view 3`}
-                            className="w-full h-full object-cover rounded-lg"
+                            className="w-full max-w-full h-[200px] xl:h-[230px] object-cover rounded-lg"
                             loading="lazy"
                         />
                     </div>
@@ -200,9 +200,9 @@ export default function DestinationDetails() {
                                 </Card>
                                 <Card className="bg-card border-border">
                                     <CardContent className="p-4 text-center">
-                                        <DollarSign className="w-6 h-6 text-primary mx-auto mb-2" strokeWidth={2} />
-                                        <div className="font-bold text-lg text-card-foreground">${destination.price}</div>
-                                        <div className="text-sm text-muted-foreground">Per Person</div>
+                                        <Brain className="w-6 h-6 text-primary mx-auto mb-2" strokeWidth={2} />
+                                        <div className="font-bold text-lg text-card-foreground">{destination.avg_sentiment_score}</div>
+                                        <div className="text-sm text-muted-foreground">AI Sentiment Score</div>
                                     </CardContent>
                                 </Card>
                             </div>
