@@ -21,3 +21,9 @@ export const getLocationById = async ({ queryKey }) => {
         similar,
     };
 }
+
+export const fetchLocations = async ({ pageParam = 1 }) => {
+    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/locations?page=${pageParam}&limit=10`);
+    if (!res.ok) throw new Error("Failed to fetch");
+    return res.json(); // backend trả về { data, nextPage, hasMore }
+};

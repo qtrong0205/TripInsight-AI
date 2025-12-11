@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Compass, Mountain, Building2, Palmtree, Landmark, TreePine } from 'lucide-react';
@@ -6,6 +6,7 @@ import CategoryChip from '../components/CategoryChip';
 import DestinationCard from '../components/DestinationCard';
 import Sidebar, { FilterState } from '../components/Sidebar';
 import { Destination } from '../data/destinations';
+import { useLocationsInfinite } from '../hooks/location.queries';
 
 const categories = [
     { label: 'All', icon: <Compass className="w-4 h-4" strokeWidth={2} /> },
@@ -25,34 +26,46 @@ export default function Home() {
         categories: [],
     });
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const bottomRef = useRef<HTMLDivElement | null>(null);
 
-    const [destinations, setDestinations] = useState<Destination[]>([]);
-    const [loading, setLoading] = useState<boolean>(false);
-    const [error, setError] = useState<string | null>(null);
+
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        status,
+        error,
+    } = useLocationsInfinite();
+
+    // Flatten pages from infinite query; ensure array type
+    const destinations: Destination[] = useMemo(() => {
+        const pages = (data?.pages ?? []) as Destination[][] | Destination[];
+        // If backend returns arrays per page: flatten; if single array: coerce
+        const flat = Array.isArray(pages[0]) ? (pages as Destination[][]).flat() : (pages as Destination[]);
+        // Apply client-side filters (optional): search/category/basic filters
+        return flat.filter((dest) => {
+            const matchesSearch = selectedCategory === 'All' // placeholder; search handled below
+                ? true
+                : dest.categories?.includes?.(selectedCategory);
+            return matchesSearch;
+        });
+    }, [data?.pages, selectedCategory]);
 
     const searchQuery = searchParams.get('search') || '';
 
     useEffect(() => {
-        window.scrollTo(0, 0);
-    }, []);
-
-    useEffect(() => {
-        const getLocations = async () => {
-            try {
-                setLoading(true);
-                setError(null);
-                const res = await fetch('http://localhost:3000/api/locations');
-                if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
-                const data = await res.json();
-                setDestinations(data.data as Destination[]);
-            } catch (e: any) {
-                setError(e?.message || 'Failed to load destinations');
-            } finally {
-                setLoading(false);
+        const el = bottomRef.current;
+        if (!el) return;
+        const observer = new IntersectionObserver((entries) => {
+            const first = entries[0];
+            if (first?.isIntersecting && hasNextPage && !isFetchingNextPage) {
+                fetchNextPage();
             }
-        };
-        getLocations();
-    }, []);
+        });
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
     // const destinations = destinations.filter((dest) => {
     //     // Search filter
@@ -139,13 +152,13 @@ export default function Home() {
                             {destinations.length} destination{destinations.length !== 1 ? 's' : ''}
                         </p>
                     </div>
-                    {loading && (
+                    {status === 'pending' && (
                         <div className="text-center py-12 text-muted-foreground">Loading destinations…</div>
                     )}
-                    {error && (
-                        <div className="text-center py-12 text-destructive">{error}</div>
+                    {status === 'error' && (
+                        <div className="text-center py-12 text-destructive">{(error as Error)?.message || 'Failed to load destinations'}</div>
                     )}
-                    {!loading && !error && destinations.length > 0 ? (
+                    {status === 'success' && destinations.length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             {destinations.map((destination) => (
                                 <DestinationCard key={destination.id} destination={destination} />
@@ -158,6 +171,10 @@ export default function Home() {
                             </p>
                         </div>
                     )}
+                    {isFetchingNextPage && (
+                        <div className="text-center py-6 text-muted-foreground">Loading more…</div>
+                    )}
+                    <div ref={bottomRef} className="h-8" />
                 </section>
             </div>
         </div>
