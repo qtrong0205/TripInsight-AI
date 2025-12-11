@@ -4,10 +4,21 @@ import { locationService } from './location.service';
 export const locationController = {
     getAllLocations: async (req: Request, res: Response) => {
         try {
-            const locations = await locationService.getAllLocations();
-            res.status(200).json({ success: true, data: locations });
+            const page = Math.max(parseInt(String(req.query.page ?? "1")) || 1, 1);
+            const limit = Math.min(parseInt(String(req.query.limit ?? "10")) || 10, 100);
+
+            const result = await locationService.getAllLocations(page, limit);
+
+            res.status(200).json({
+                success: true,
+                ...result,
+            });
+
         } catch (error: any) {
-            res.status(400).json({ success: false, message: error.message });
+            res.status(400).json({
+                success: false,
+                message: error.message,
+            });
         }
     },
     getLocationById: async (req: Request, res: Response) => {

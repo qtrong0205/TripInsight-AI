@@ -1,14 +1,17 @@
 import supabase from "../../config/supabase";
 
 export const locationModel = {
-    getAllLocations: async () => {
-        const { data, error } = await supabase
-            .from('places')
-            .select('*')
-            .limit(20);
+    getAllLocations: async (from: number, to: number) => {
+        const { data, error, count } = await supabase
+            .from("places")
+            .select("*", { count: "exact" })
+            .range(from, to);
+
         if (error) throw error;
-        return data;
+
+        return { data, count };
     },
+
     getLocationById: async (id: string) => {
         const { data, error } = await supabase
             .from('places')
