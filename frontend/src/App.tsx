@@ -10,6 +10,7 @@ import Login from './pages/Login';
 import Profile from './pages/Profile';
 import Register from './pages/Register';
 import EditProfile from './pages/UpdateProfile';
+import SignupFailed from './pages/SignUpFailed';
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ function App() {
                                 <Route path="/favorites" element={<Favorites />} />
                                 <Route path="/login" element={<Login />} />
                                 <Route path="/register" element={<Register />} />
+                                <Route path="/signup-failed" element={<SignupFailed />} />
                                 <Route path="/profile" element={<Profile />} />
                                 <Route path="/edit-profile" element={<EditProfile />} />
                             </Routes>

@@ -81,7 +81,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
         if (error) throw error;
         const sUser = data.user;
-        console.log(sUser)
         if (sUser) {
             setUser({
                 id: sUser.id,
@@ -102,9 +101,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             },
         });
 
-        if (error) throw error;
+        // Nếu Supabase báo lỗi thật sự (user đã tồn tại — đã confirm)
+        if (error) {
+            console.error("Supabase signUp error:", error);
+            throw error;
+        }
+
+        console.log(data)
         const sUser = data.user;
+
+        // Trường hợp email đã tồn tại nhưng chưa xác minh (Supabase không báo lỗi)
+        if (sUser && (sUser.identities?.length === 0)) {
+            console.log("SignUp failed - email already existed");
+            const tempError: any = new Error("Email chưa xác nhận.");
+            tempError.code = "email-existed";
+            throw tempError;
+        }
+        if (!data.session) {
+            console.log("SignUp success - awaiting email confirmation");
+            return {
+                status: "pending_confirmation",
+                message: "Vui lòng kiểm tra email để xác nhận tài khoản.",
+            };
+        }
         if (sUser) {
+            console.log("tạo user")
             createUser(sUser.id, sUser.user_metadata.name, sUser.user_metadata.email, sUser.created_at)
             setUser({
                 id: sUser.id,
