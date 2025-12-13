@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import z from 'zod';
 
 export interface AuthRequest extends Request {
     user?: {
@@ -41,3 +42,26 @@ export const requireAuth = (
     req.user = { id: userId };
     next();
 };
+
+const signupSchema = z.object({
+    id: z.string().uuid(),
+    email: z.string().email(),
+    name: z
+        .string()
+        .min(1)
+        .max(20),
+});
+
+export const validateSignup = (req: Request, res: Response, next: NextFunction) => {
+    const result = signupSchema.safeParse(req.body);
+
+    if (!result.success) {
+        return res.status(400).json({
+            errors: result.error.format(),
+        });
+    }
+
+    req.body = result.data;
+    next();
+};
+

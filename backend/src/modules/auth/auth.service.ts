@@ -1,8 +1,8 @@
 import { authModel } from "./auth.model"
 
 export const authService = {
-    createUser: async (user: { id?: string; email: string; name?: string }) => {
-        const created = await authModel.createUser(user);
+    signUp: async (user: { id?: string; email: string; name?: string }) => {
+        const created = await authModel.signUp(user);
         return created;
     },
     getUserById: async (id: string) => {

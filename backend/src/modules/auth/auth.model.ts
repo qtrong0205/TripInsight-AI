@@ -1,7 +1,7 @@
 import supabase from "../../config/supabase";
 
 export const authModel = {
-    createUser: async (user: { id?: string; email: string; name?: string }) => {
+    signUp: async (user: { id?: string; email: string; name?: string }) => {
         const payload: Record<string, any> = {
             id: user.id,
             email: user.email,
