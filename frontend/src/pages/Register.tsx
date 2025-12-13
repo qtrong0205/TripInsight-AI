@@ -28,18 +28,8 @@ export default function Signup() {
 
         try {
             const res = await register(name, email, password);
-
-            if (res?.status === "pending_confirmation") {
-                navigate('/signup-failed', {
-                    state: { email, reason: "email-unconfirmed" }
-                });
-                return;
-            }
-
-            if (res?.status === "signed_in") {
-                navigate('/');
-                return;
-            }
+            navigate('/');
+            return;
 
         } catch (err: any) {
             console.error("Register Error:", err);
@@ -51,15 +41,6 @@ export default function Signup() {
                 return;
             }
 
-            // Trường hợp 4: Email tồn tại nhưng chưa xác nhận (identities empty)
-            // if (err.code === "email_unconfirmed_conflict") {
-            //     navigate('/signup-failed', {
-            //         state: { email, reason: "email-unconfirmed" }
-            //     });
-            //     return;
-            // }
-
-            // Trường hợp 5: Các lỗi khác (Backend lỗi, mạng lỗi...) -> Hiển thị trên form
             setError(err.message || "Đăng ký thất bại. Vui lòng thử lại.");
         }
     };
