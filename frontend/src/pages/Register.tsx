@@ -24,19 +24,21 @@ export default function Signup() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError(''); // Reset error trước khi submit
+        setError('');
 
         try {
             const res = await register(name, email, password);
-            navigate('/');
+            navigate('/signup-status?status=email-unconfirmed', {
+                state: { email }
+            });
             return;
 
         } catch (err: any) {
             console.error("Register Error:", err);
 
             if (err?.code === "email-existed") {
-                navigate('/signup-failed', {
-                    state: { email, reason: "email-exists" }
+                navigate('/signup-status?status=email-exists', {
+                    state: { email }
                 });
                 return;
             }
@@ -88,9 +90,6 @@ export default function Signup() {
                                 required
                                 className="bg-background text-foreground border-border"
                             />
-                            <p className="text-xs text-muted-foreground">
-                                Try: test@example.com (exists) or pending@example.com (unconfirmed)
-                            </p>
                         </div>
 
                         <div className="space-y-2">
