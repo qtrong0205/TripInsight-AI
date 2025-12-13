@@ -18,4 +18,14 @@ export const authModel = {
         if (error) throw error;
         return data;
     },
+    getUserById: async (id: string) => {
+        const { data, error } = await supabase
+            .from('users')
+            .select('id, email, username, role, created_at, avatar')
+            .eq('id', id)
+            .maybeSingle()
+
+        if (error) throw error;
+        return data;
+    }
 };

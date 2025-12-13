@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { authService } from './auth.service';
+import { AuthRequest } from '../../middlewares/auth.middleware';
 
 export const authController = {
     createUser: async (req: Request, res: Response) => {
@@ -12,6 +13,19 @@ export const authController = {
             res.status(201).json({ success: true, data: user });
         } catch (error: any) {
             res.status(400).json({ success: false, message: error.message });
+        }
+    },
+    getUserById: async (req: AuthRequest, res: Response) => {
+        try {
+            const userId = req.user?.id || '';
+            if (!userId) {
+                return res.status(401).json({ message: 'Unauthorized' });
+            }
+
+            const user = await authService.getUserById(userId);
+            res.json({ success: true, data: user });
+        } catch (error: any) {
+            res.status(500).json({ message: error.message });
         }
     },
 }
