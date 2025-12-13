@@ -5,15 +5,38 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '../contexts/useAuth';
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const signupSchema = z
+    .object({
+        name: z.string().trim().min(1, "Tên không được để trống"),
+        email: z.string().email("Email không hợp lệ"),
+        password: z.string().min(6, "Mật khẩu tối thiểu 6 ký tự"),
+        confirmPassword: z.string(),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+        message: "Mật khẩu không khớp",
+        path: ["confirmPassword"],
+    });
 
 export default function Signup() {
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
-    const { register, user } = useAuth();
+    const { register: registerApi, user } = useAuth();
     const navigate = useNavigate();
+
+    const form = useForm({
+        resolver: zodResolver(signupSchema),
+        defaultValues: {
+            name: '',
+            email: '',
+            password: '',
+            confirmPassword: '',
+        },
+    });
+
+    const { handleSubmit, register: rhfRegister, formState } = form;
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -22,27 +45,26 @@ export default function Signup() {
         }
     }, [user, navigate]);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError('');
-
+    // submission handler
+    const onSubmit = async (values: {
+        name: string;
+        email: string;
+        password: string;
+        confirmPassword: string;
+    }) => {
         try {
-            const res = await register(name, email, password);
+            await registerApi(values.name, values.email, values.password);
             navigate('/signup-status?status=email-unconfirmed', {
-                state: { email }
+                state: { email: values.email },
             });
-            return;
-
         } catch (err: any) {
             console.error("Register Error:", err);
-
             if (err?.code === "email-existed") {
                 navigate('/signup-status?status=email-exists', {
-                    state: { email }
+                    state: { email: values.email }
                 });
                 return;
             }
-
             setError(err.message || "Đăng ký thất bại. Vui lòng thử lại.");
         }
     };
@@ -59,7 +81,7 @@ export default function Signup() {
                     </p>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                         {error && (
                             <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-lg text-sm">
                                 {error}
@@ -72,11 +94,14 @@ export default function Signup() {
                                 id="name"
                                 type="text"
                                 placeholder="John Doe"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                required
+                                {...rhfRegister("name")}
                                 className="bg-background text-foreground border-border"
                             />
+                            {formState.errors.name && (
+                                <p className="text-sm text-destructive">
+                                    {formState.errors.name.message as string}
+                                </p>
+                            )}
                         </div>
 
                         <div className="space-y-2">
@@ -85,11 +110,14 @@ export default function Signup() {
                                 id="email"
                                 type="email"
                                 placeholder="your@email.com"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
+                                {...rhfRegister("email")}
                                 className="bg-background text-foreground border-border"
                             />
+                            {formState.errors.email && (
+                                <p className="text-sm text-destructive">
+                                    {formState.errors.email.message as string}
+                                </p>
+                            )}
                         </div>
 
                         <div className="space-y-2">
@@ -98,11 +126,14 @@ export default function Signup() {
                                 id="password"
                                 type="password"
                                 placeholder="••••••••"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
+                                {...rhfRegister("password")}
                                 className="bg-background text-foreground border-border"
                             />
+                            {formState.errors.password && (
+                                <p className="text-sm text-destructive">
+                                    {formState.errors.password.message as string}
+                                </p>
+                            )}
                         </div>
 
                         <div className="space-y-2">
@@ -113,11 +144,14 @@ export default function Signup() {
                                 id="confirm-password"
                                 type="password"
                                 placeholder="••••••••"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                required
+                                {...rhfRegister("confirmPassword")}
                                 className="bg-background text-foreground border-border"
                             />
+                            {formState.errors.confirmPassword && (
+                                <p className="text-sm text-destructive">
+                                    {formState.errors.confirmPassword.message as string}
+                                </p>
+                            )}
                         </div>
 
                         <Button
