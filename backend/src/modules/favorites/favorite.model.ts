@@ -20,4 +20,21 @@ export const favoriteModel = {
 
         return data;
     },
+    getSavedPlaces: async (userId: string) => {
+        const { data, error } = await supabase
+            .from("saved_places")
+            .select(`
+                place_id,
+                places (
+                name,
+                slug,
+                location, 
+                image
+            )
+            `)
+            .eq("user_id", userId)
+            .limit(10)
+        if (error) throw error
+        return data
+    }
 }

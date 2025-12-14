@@ -12,5 +12,17 @@ export const favoriteController = {
         } catch (error: any) {
             res.status(400).json({ message: error.message })
         }
+    },
+    getSavedPlace: async (req: AuthRequest, res: Response) => {
+        try {
+            const userId = req.user?.id || '';
+            const savedPlaces = await favoriteService.getSavedPlaces(userId)
+            res.status(200).json({ success: true, data: savedPlaces })
+        } catch (error: any) {
+            res.status(400).json({
+                success: false,
+                message: error.message || "Something went wrong",
+            });
+        }
     }
 }
