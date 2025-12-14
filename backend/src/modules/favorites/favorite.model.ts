@@ -26,10 +26,15 @@ export const favoriteModel = {
             .select(`
                 place_id,
                 places (
+                place_id,
                 name,
                 slug,
                 location, 
-                image
+                image,
+                categories,
+                avg_sentiment_score,
+                reviews,
+                embed_map_url
             )
             `)
             .eq("user_id", userId)
