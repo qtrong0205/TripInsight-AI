@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '../contexts/useAuth';
-import { useFavorites } from '../contexts/FavoritesContext';
+import { useFavorites } from '../contexts/favorites/useFavorites';
 import { destinations } from '../data/destinations';
 
 export default function Profile() {

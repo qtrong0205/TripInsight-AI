@@ -7,6 +7,7 @@ export interface User {
     avatar: string;
     createdAt?: string;
     role?: string;
+    access_token?: string;
 }
 
 export interface AuthContextType {

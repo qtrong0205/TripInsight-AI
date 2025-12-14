@@ -4,17 +4,17 @@ import { Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import DestinationCard from '../components/DestinationCard';
-import { useFavorites } from '../contexts/FavoritesContext';
+import { useFavorites } from '../contexts/favorites/useFavorites';
 import { destinations } from '../data/destinations';
 
 export default function Favorites() {
     const { favorites } = useFavorites();
+    console.log('Favorites in Favorites page:', favorites);
 
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
 
-    const favoriteDestinations = destinations.filter((dest) => favorites.includes(dest.id));
 
     return (
         <div className="min-h-screen bg-background">
@@ -22,14 +22,14 @@ export default function Favorites() {
                 <div className="mb-8">
                     <h1 className="text-4xl font-bold text-foreground mb-2">My Favorites</h1>
                     <p className="text-muted-foreground">
-                        {favoriteDestinations.length} saved destination{favoriteDestinations.length !== 1 ? 's' : ''}
+                        {favorites.length} saved destination{favorites.length !== 1 ? 's' : ''}
                     </p>
                 </div>
 
-                {favoriteDestinations.length > 0 ? (
+                {favorites.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {favoriteDestinations.map((destination) => (
-                            <DestinationCard key={destination.id} destination={destination} />
+                        {favorites.map((destination) => (
+                            <DestinationCard key={destination.id} destination={destination.places} />
                         ))}
                     </div>
                 ) : (

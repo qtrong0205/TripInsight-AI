@@ -9,7 +9,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import ReviewCard from '../components/ReviewCard';
 import DestinationCard from '../components/DestinationCard';
 import type { Destination } from '../data/destinations';
-import { useFavorites } from '../contexts/FavoritesContext';
+import { useFavorites } from '../contexts/favorites/useFavorites';
 import { useLocationQuery } from '../hooks/location.queries';
 
 export default function DestinationDetails() {

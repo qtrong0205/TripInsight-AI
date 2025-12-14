@@ -2,8 +2,8 @@ import { Link } from 'react-router-dom';
 import { MapPin, Star, Heart } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useFavorites } from '../contexts/FavoritesContext';
 import type { Destination } from '../data/destinations';
+import { useFavorites } from '../contexts/favorites/useFavorites';
 
 interface DestinationCardProps {
     destination: Destination;
@@ -12,6 +12,7 @@ interface DestinationCardProps {
 export default function DestinationCard({ destination }: DestinationCardProps) {
     const { favorites, addFavorite, removeFavorite } = useFavorites();
     const isFavorite = favorites.includes(destination.place_id);
+    console.log('DestinationCard - isFavorite:', isFavorite, 'for destination:', destination.name);
 
     const handleFavoriteClick = (e: React.MouseEvent) => {
         e.preventDefault();

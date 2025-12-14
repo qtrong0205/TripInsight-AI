@@ -75,6 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     avatar: user?.avatar,
                     createdAt: user?.created_at,
                     role: user?.role || "guest",
+                    access_token: session?.access_token,
                 });
             } else {
                 console.warn('No data field in /api/me response:', json);
