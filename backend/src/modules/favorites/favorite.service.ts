@@ -10,5 +10,10 @@ export const favoriteService = {
         if (!userId) throw new Error('User Id is required');
         const savedPlaces = await favoriteModel.getSavedPlaces(userId)
         return savedPlaces;
+    },
+    deletePlace: async (userId: string, placeId: string) => {
+        if (!userId || !placeId) throw new Error('Place id, User Id is required');
+        const deleted = await favoriteModel.deletePlace(userId, placeId)
+        return deleted;
     }
 }

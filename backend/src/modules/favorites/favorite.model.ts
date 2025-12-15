@@ -41,5 +41,20 @@ export const favoriteModel = {
             .limit(10)
         if (error) throw error
         return data
+    },
+    deletePlace: async (userId: string, placeId: string) => {
+        const { data, error } = await supabase
+            .from("saved_places")
+            .delete()
+            .eq("user_id", userId)
+            .eq("place_id", placeId)
+            .select()
+            .single();
+
+        if (error) {
+            throw error;
+        }
+
+        return data;
     }
 }

@@ -24,5 +24,15 @@ export const favoriteController = {
                 message: error.message || "Something went wrong",
             });
         }
-    }
+    },
+    deletePlace: async (req: AuthRequest, res: Response) => {
+        try {
+            const { placeId } = req.params || ""
+            const userId = req.user?.id || '';
+            const deletedPlace = await favoriteService.deletePlace(userId, placeId)
+            res.status(200).json({ success: true, data: deletedPlace })
+        } catch (error: any) {
+            res.status(400).json({ message: error.message })
+        }
+    },
 }
