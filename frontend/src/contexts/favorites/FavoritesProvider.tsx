@@ -55,7 +55,27 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
 
     const removeFavorite: FavoritesContextType['removeFavorite'] = (placeId: string) => {
         setFavorites((prev) => prev.filter((fav) => fav.place_id !== placeId));
-        // Optionally call backend to delete; implement when API supports DELETE
+        const addFavorite = async () => {
+            try {
+                const response = await fetch(`http://localhost:3000/api/favorites/${placeId}`, {
+                    method: "DELETE",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${user.access_token}`,
+                    },
+                });
+
+                const json = await response.json();
+                if (json?.data && json.data.places) {
+                    setFavorites((prev) => [...prev, json.data as Favorite]);
+                } else {
+                    await fetchFavorites();
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+        addFavorite()
     };
 
     return (
