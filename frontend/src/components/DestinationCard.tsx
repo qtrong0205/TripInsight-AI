@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import type { Destination } from '../data/destinations';
 import { useFavorites } from '../contexts/favorites/useFavorites';
+import { useEffect, useState } from 'react';
 
 interface DestinationCardProps {
     destination: Destination;
@@ -11,15 +12,27 @@ interface DestinationCardProps {
 
 export default function DestinationCard({ destination }: DestinationCardProps) {
     const { favorites, addFavorite, removeFavorite } = useFavorites();
-    const favoriteId = favorites.map(fav => fav.place_id);
-    const isFavorite = favoriteId.includes(destination.place_id);
+    // favorites is an array of Favorite objects: use place_id to check
+    const [isFavorite, setIsFavorite] = useState<boolean>(
+        favorites.some(fav => fav && fav.place_id != null && String(fav.place_id) === String(destination.place_id))
+    );
+
+    useEffect(() => {
+        setIsFavorite(
+            favorites.some(
+                fav => fav && fav.place_id != null && String(fav.place_id) === String(destination.place_id)
+            )
+        );
+    }, [favorites, destination.place_id]);
 
     const handleFavoriteClick = (e: React.MouseEvent) => {
         e.preventDefault();
         if (isFavorite) {
-            removeFavorite(destination.place_id);
+            removeFavorite(String(destination.place_id));
+            setIsFavorite(false);
         } else {
-            addFavorite(destination.place_id);
+            addFavorite(String(destination.place_id));
+            setIsFavorite(true);
         }
     };
 

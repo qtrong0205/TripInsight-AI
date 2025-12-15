@@ -12,7 +12,7 @@ export default function Favorites() {
 
     useEffect(() => {
         window.scrollTo(0, 0);
-    }, []);
+    }, [favorites]);
 
 
     return (
@@ -27,9 +27,11 @@ export default function Favorites() {
 
                 {favorites.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {favorites.map((destination) => (
-                            <DestinationCard key={destination.id} destination={destination.places} />
-                        ))}
+                        {favorites
+                            .filter(fav => fav && fav.places && fav.place_id != null)
+                            .map((fav) => (
+                                <DestinationCard key={String(fav.place_id)} destination={fav.places} />
+                            ))}
                     </div>
                 ) : (
                     <Card className="bg-card border-border">

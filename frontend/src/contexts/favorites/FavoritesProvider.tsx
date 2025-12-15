@@ -1,41 +1,61 @@
 import { ReactNode, useEffect, useState } from 'react';
-import { FavoritesContext, FavoritesContextType } from './FavoritesContext';
+import { FavoritesContext, FavoritesContextType, Favorite } from './FavoritesContext';
 import { useAuth } from '../useAuth';
 
 export function FavoritesProvider({ children }: { children: ReactNode }) {
     const { user } = useAuth();
-    const [favorites, setFavorites] = useState<string[]>(() => {
-        const saved = localStorage.getItem('favorites');
-        return saved ? JSON.parse(saved) : [];
-    });
+    const [favorites, setFavorites] = useState<Favorite[]>([]);
+
+    const fetchFavorites = async () => {
+        if (!user?.access_token) return;
+        try {
+            const response = await fetch('http://localhost:3000/api/favorites', {
+                headers: {
+                    Authorization: `Bearer ${user.access_token}`,
+                },
+            });
+
+            const json = await response.json();
+            // Expect backend to return array of Favorite objects
+            setFavorites(Array.isArray(json.data) ? json.data : []);
+        } catch (e) {
+            console.error(e);
+        }
+    };
 
     useEffect(() => {
-        if (!user?.access_token) return;
+        fetchFavorites();
+    }, [user]);
 
-        const getFavorites = async () => {
+    const addFavorite: FavoritesContextType['addFavorite'] = (placeId: string) => {
+        const addFavorite = async () => {
             try {
                 const response = await fetch('http://localhost:3000/api/favorites', {
+                    method: "POST",
                     headers: {
+                        'Content-Type': 'application/json',
                         Authorization: `Bearer ${user.access_token}`,
                     },
+                    body: JSON.stringify({ placeId }),
                 });
 
                 const json = await response.json();
-                setFavorites(json.data);
-            } catch (e) {
-                console.error(e);
+                // If backend returns full object, append; else refresh list to include enriched data
+                if (json?.data && json.data.places) {
+                    setFavorites((prev) => [...prev, json.data as Favorite]);
+                } else {
+                    await fetchFavorites();
+                }
+            } catch (error) {
+                console.error(error);
             }
-        };
-
-        getFavorites();
-    }, [user]);
-
-    const addFavorite: FavoritesContextType['addFavorite'] = (id: string) => {
-        setFavorites((prev) => [...prev, id]);
+        }
+        addFavorite()
     };
 
-    const removeFavorite: FavoritesContextType['removeFavorite'] = (id: string) => {
-        setFavorites((prev) => prev.filter((fav) => fav !== id));
+    const removeFavorite: FavoritesContextType['removeFavorite'] = (placeId: string) => {
+        setFavorites((prev) => prev.filter((fav) => fav.place_id !== placeId));
+        // Optionally call backend to delete; implement when API supports DELETE
     };
 
     return (
