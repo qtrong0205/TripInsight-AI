@@ -7,7 +7,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '../contexts/useAuth';
 import { useFavorites } from '../contexts/favorites/useFavorites';
-import { destinations } from '../data/destinations';
 
 export default function Profile() {
     const { user } = useAuth();
@@ -33,7 +32,7 @@ export default function Profile() {
         return null;
     }
 
-    const favoriteDestinations = destinations.filter((dest) => favorites.includes(dest.id));
+    const favoriteDestinations = favorites.map(fav => fav.places)
 
     return (
         <div className="min-h-screen bg-background">
@@ -112,7 +111,7 @@ export default function Profile() {
                                                 <div
                                                     key={dest.id}
                                                     className="flex items-center space-x-4 p-3 rounded-lg hover:bg-neutral transition-colors cursor-pointer"
-                                                    onClick={() => navigate(`/destination/${dest.slug}`)}
+                                                    onClick={() => navigate(`/destination/${dest.slug}${dest.place_id ? `?place_id=${encodeURIComponent(String(dest.place_id))}` : ''}`)}
                                                 >
                                                     <img
                                                         src={dest.image}
