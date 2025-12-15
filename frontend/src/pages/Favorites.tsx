@@ -9,7 +9,6 @@ import { destinations } from '../data/destinations';
 
 export default function Favorites() {
     const { favorites } = useFavorites();
-    console.log('Favorites in Favorites page:', favorites);
 
     useEffect(() => {
         window.scrollTo(0, 0);

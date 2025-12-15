@@ -21,7 +21,6 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
                 });
 
                 const json = await response.json();
-                console.log('Fetched favorites:', json);
                 setFavorites(json.data);
             } catch (e) {
                 console.error(e);

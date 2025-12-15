@@ -11,8 +11,8 @@ interface DestinationCardProps {
 
 export default function DestinationCard({ destination }: DestinationCardProps) {
     const { favorites, addFavorite, removeFavorite } = useFavorites();
-    const isFavorite = favorites.includes(destination.place_id);
-    console.log('DestinationCard - isFavorite:', isFavorite, 'for destination:', destination.name);
+    const favoriteId = favorites.map(fav => fav.place_id);
+    const isFavorite = favoriteId.includes(destination.place_id);
 
     const handleFavoriteClick = (e: React.MouseEvent) => {
         e.preventDefault();
