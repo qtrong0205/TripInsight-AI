@@ -1,12 +1,7 @@
-import { useState } from 'react';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Star } from 'lucide-react';
-
-interface SidebarProps {
-    setFilters: (filters: FilterState) => void;
-}
 
 export interface FilterState {
     scoreRange: [number, number];
@@ -14,48 +9,31 @@ export interface FilterState {
     categories: string[];
 }
 
-export default function Sidebar({ setFilters }: SidebarProps) {
-    const [scoreRange, setScoreRange] = useState<[number, number]>([0, 100]);
-    const [rating, setRating] = useState(0);
-    const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+interface SidebarProps {
+    filters: FilterState;
+    setFilters: (filters: FilterState) => void;
+}
 
+export default function Sidebar({ filters, setFilters }: SidebarProps) {
     const categories = ['Tourism', 'Attraction', 'Building', 'Natural', 'Heritage', 'Beach'];
 
     const handleCategoryToggle = (category: string) => {
-        const newCategories = selectedCategories.includes(category)
-            ? selectedCategories.filter((c) => c !== category)
-            : [...selectedCategories, category];
-        setSelectedCategories(newCategories);
-        applyFilters(scoreRange, rating, newCategories);
+        const newCategories = filters.categories.includes(category)
+            ? filters.categories.filter((c) => c !== category)
+            : [...filters.categories, category];
+        setFilters({ ...filters, categories: newCategories });
     };
 
     const handleSentimentScoreChange = (value: number[]) => {
         const newRange: [number, number] = [value[0], value[1]];
-        setScoreRange(newRange);
-        applyFilters(newRange, rating, selectedCategories);
+        setFilters({ ...filters, scoreRange: newRange });
     };
 
     const handleRatingChange = (newRating: number) => {
-        setRating(newRating);
-        applyFilters(scoreRange, newRating, selectedCategories);
-    };
-
-    const applyFilters = (
-        score: [number, number],
-        minRating: number,
-        cats: string[]
-    ) => {
-        setFilters({
-            scoreRange: score,
-            rating: minRating,
-            categories: cats,
-        });
+        setFilters({ ...filters, rating: newRating });
     };
 
     const handleReset = () => {
-        setScoreRange([0, 100]);
-        setRating(0);
-        setSelectedCategories([]);
         setFilters({
             scoreRange: [0, 100],
             rating: 0,
@@ -73,7 +51,7 @@ export default function Sidebar({ setFilters }: SidebarProps) {
                             key={category}
                             onClick={() => handleCategoryToggle(category)}
                             variant="ghost"
-                            className={`w-full justify-start font-normal ${selectedCategories.includes(category)
+                            className={`w-full justify-start font-normal ${filters.categories.includes(category)
                                 ? 'bg-neutral text-primary'
                                 : 'text-card-foreground hover:bg-neutral hover:text-card-foreground'
                                 }`}
@@ -90,15 +68,15 @@ export default function Sidebar({ setFilters }: SidebarProps) {
                 <h3 className="font-semibold text-lg mb-4 text-card-foreground">Sentiment Score Range</h3>
                 <div className="space-y-4">
                     <Slider
-                        value={scoreRange}
+                        value={filters.scoreRange}
                         onValueChange={handleSentimentScoreChange}
                         max={100}
                         step={1}
                         className="w-full"
                     />
                     <div className="flex justify-between text-sm text-muted-foreground">
-                        <span>{scoreRange[0]}</span>
-                        <span>{scoreRange[1]}</span>
+                        <span>{filters.scoreRange[0]}</span>
+                        <span>{filters.scoreRange[1]}</span>
                     </div>
                 </div>
             </div>
@@ -117,7 +95,7 @@ export default function Sidebar({ setFilters }: SidebarProps) {
                             <Star
                                 className="w-6 h-6 text-tertiary cursor-pointer transition-transform hover:scale-110"
                                 strokeWidth={2}
-                                fill={i < rating ? 'currentColor' : 'none'}
+                                fill={i < filters.rating ? 'currentColor' : 'none'}
                             />
                         </button>
                     ))}

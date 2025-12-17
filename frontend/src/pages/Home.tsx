@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Globe, Flag } from 'lucide-react';
+import { Globe, Flag, SlidersHorizontal, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import CategoryChip from '../components/CategoryChip';
 import DestinationCard from '../components/DestinationCard';
 import Sidebar, { FilterState } from '../components/Sidebar';
@@ -115,7 +116,7 @@ export default function Home() {
         <div className="flex flex-col md:flex-row max-w-screen-2xl min-h-screen bg-background">
             {/* Sidebar */}
             <div className="hidden md:block md:w-64 border-r">
-                <Sidebar setFilters={setFilters} />
+                <Sidebar filters={filters} setFilters={setFilters} />
             </div>
 
             {/* Main */}
@@ -139,10 +140,46 @@ export default function Home() {
                     </div>
                 </section>
 
+                {/* Mobile filter toggle button */}
+                <div className="md:hidden fixed bottom-6 right-6 z-40">
+                    <Button
+                        onClick={() => setSidebarOpen(!sidebarOpen)}
+                        className="rounded-full w-14 h-14 shadow-lg bg-primary text-primary-foreground hover:bg-secondary"
+                    >
+                        {sidebarOpen ? (
+                            <X className="w-6 h-6" strokeWidth={2} />
+                        ) : (
+                            <SlidersHorizontal className="w-6 h-6" strokeWidth={2} />
+                        )}
+                    </Button>
+                </div>
+
+                {/* Mobile filter sidebar */}
+                {sidebarOpen && (
+                    <div className="md:hidden fixed inset-0 z-30 bg-black/50" onClick={() => setSidebarOpen(false)}>
+                        <div
+                            className="absolute left-0 top-0 bottom-0 w-72 bg-background overflow-y-auto"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex items-center justify-between p-4 border-b border-border">
+                                <h2 className="font-semibold text-lg">Filters</h2>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setSidebarOpen(false)}
+                                >
+                                    <X className="w-5 h-5" strokeWidth={2} />
+                                </Button>
+                            </div>
+                            <Sidebar filters={filters} setFilters={setFilters} />
+                        </div>
+                    </div>
+                )}
+
                 {/* Countries */}
                 <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <ScrollArea className="w-full whitespace-nowrap">
-                        <div className="flex space-x-3 pb-4">
+                        <div className="flex space-x-   3 pb-4">
                             {countries.map((country) => (
                                 <CategoryChip
                                     key={country.label}
