@@ -1,11 +1,12 @@
+import { DestinationFilters } from "../../data/location";
 import { locationModel } from "./location.model";
 
 export const locationService = {
-    getAllLocations: async (page: number, limit: number) => {
+    getAllLocations: async (page: number, limit: number, filters: DestinationFilters) => {
         const from = (page - 1) * limit;
         const to = from + limit - 1;
 
-        const { data, count } = await locationModel.getAllLocations(from, to);
+        const { data, count } = await locationModel.getAllLocations(from, to, filters);
 
         if (!data) throw new Error("Failed to fetch");
 

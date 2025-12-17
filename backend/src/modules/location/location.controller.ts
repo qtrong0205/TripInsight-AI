@@ -6,8 +6,19 @@ export const locationController = {
         try {
             const page = Math.max(parseInt(String(req.query.page ?? "1")) || 1, 1);
             const limit = Math.min(parseInt(String(req.query.limit ?? "10")) || 10, 100);
+            const {
+                categories,
+                rating,
+                sentimentScore,
+                sort
+            } = req.query;
 
-            const result = await locationService.getAllLocations(page, limit);
+            const result = await locationService.getAllLocations(page, limit, {
+                categories: Array.isArray(categories) ? categories.join(',') : (categories as string | undefined),
+                rating: rating ? parseFloat(String(rating)) : undefined,
+                sentimentScore: sentimentScore ? parseFloat(String(sentimentScore)) : undefined,
+                sort: sort as 'newest' | 'popular' | 'rating' | undefined,
+            });
 
             res.status(200).json({
                 success: true,
