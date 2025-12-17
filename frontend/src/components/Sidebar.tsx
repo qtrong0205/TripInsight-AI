@@ -9,55 +9,55 @@ interface SidebarProps {
 }
 
 export interface FilterState {
-    priceRange: [number, number];
+    scoreRange: [number, number];
     rating: number;
     categories: string[];
 }
 
 export default function Sidebar({ setFilters }: SidebarProps) {
-    const [priceRange, setPriceRange] = useState<[number, number]>([0, 5000]);
+    const [scoreRange, setScoreRange] = useState<[number, number]>([0, 100]);
     const [rating, setRating] = useState(0);
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
-    const categories = ['Beach', 'Mountain', 'City', 'Adventure', 'Cultural', 'Nature'];
+    const categories = ['Tourism', 'Attraction', 'Sights', 'Nature', 'Historic', 'Cultural'];
 
     const handleCategoryToggle = (category: string) => {
         const newCategories = selectedCategories.includes(category)
             ? selectedCategories.filter((c) => c !== category)
             : [...selectedCategories, category];
         setSelectedCategories(newCategories);
-        applyFilters(priceRange, rating, newCategories);
+        applyFilters(scoreRange, rating, newCategories);
     };
 
-    const handlePriceChange = (value: number[]) => {
+    const handleSentimentScoreChange = (value: number[]) => {
         const newRange: [number, number] = [value[0], value[1]];
-        setPriceRange(newRange);
+        setScoreRange(newRange);
         applyFilters(newRange, rating, selectedCategories);
     };
 
     const handleRatingChange = (newRating: number) => {
         setRating(newRating);
-        applyFilters(priceRange, newRating, selectedCategories);
+        applyFilters(scoreRange, newRating, selectedCategories);
     };
 
     const applyFilters = (
-        price: [number, number],
+        score: [number, number],
         minRating: number,
         cats: string[]
     ) => {
         setFilters({
-            priceRange: price,
+            scoreRange: score,
             rating: minRating,
             categories: cats,
         });
     };
 
     const handleReset = () => {
-        setPriceRange([0, 5000]);
+        setScoreRange([0, 100]);
         setRating(0);
         setSelectedCategories([]);
         setFilters({
-            priceRange: [0, 5000],
+            scoreRange: [0, 100],
             rating: 0,
             categories: [],
         });
@@ -87,18 +87,18 @@ export default function Sidebar({ setFilters }: SidebarProps) {
             <Separator className="bg-border" />
 
             <div>
-                <h3 className="font-semibold text-lg mb-4 text-card-foreground">Price Range</h3>
+                <h3 className="font-semibold text-lg mb-4 text-card-foreground">Sentiment Score Range</h3>
                 <div className="space-y-4">
                     <Slider
-                        value={priceRange}
-                        onValueChange={handlePriceChange}
-                        max={5000}
-                        step={100}
+                        value={scoreRange}
+                        onValueChange={handleSentimentScoreChange}
+                        max={100}
+                        step={5}
                         className="w-full"
                     />
                     <div className="flex justify-between text-sm text-muted-foreground">
-                        <span>${priceRange[0]}</span>
-                        <span>${priceRange[1]}</span>
+                        <span>{scoreRange[0]}</span>
+                        <span>{scoreRange[1]}</span>
                     </div>
                 </div>
             </div>

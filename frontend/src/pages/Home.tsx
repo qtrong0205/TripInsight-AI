@@ -1,27 +1,27 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Compass, Mountain, Building2, Palmtree, Landmark, TreePine } from 'lucide-react';
+import { Globe, Flag } from 'lucide-react';
 import CategoryChip from '../components/CategoryChip';
 import DestinationCard from '../components/DestinationCard';
 import Sidebar, { FilterState } from '../components/Sidebar';
 import { Destination } from '../data/destinations';
 import { useLocationsInfinite } from '../hooks/location.queries';
 
-const categories = [
-    { label: 'All', icon: <Compass className="w-4 h-4" strokeWidth={2} /> },
-    { label: 'Beach', icon: <Palmtree className="w-4 h-4" strokeWidth={2} /> },
-    { label: 'Mountain', icon: <Mountain className="w-4 h-4" strokeWidth={2} /> },
-    { label: 'City', icon: <Building2 className="w-4 h-4" strokeWidth={2} /> },
-    { label: 'Cultural', icon: <Landmark className="w-4 h-4" strokeWidth={2} /> },
-    { label: 'Nature', icon: <TreePine className="w-4 h-4" strokeWidth={2} /> },
+const countries = [
+    { label: 'All', icon: <Globe className="w-4 h-4" strokeWidth={2} />, keywords: [] },
+    { label: 'Viet Nam', icon: <Flag className="w-4 h-4" strokeWidth={2} />, keywords: ['vietnam', 'việt nam', 'viet nam'] },
+    { label: 'Japan', icon: <Flag className="w-4 h-4" strokeWidth={2} />, keywords: ['japan', 'Nhật Bản'] },
+    { label: 'USA', icon: <Flag className="w-4 h-4" strokeWidth={2} />, keywords: ['United States of America', 'America'] },
+    { label: 'England', icon: <Flag className="w-4 h-4" strokeWidth={2} />, keywords: ['United Kingdom'] },
+    { label: 'Singapore', icon: <Flag className="w-4 h-4" strokeWidth={2} />, keywords: ['singapore'] },
 ];
 
 export default function Home() {
     const [searchParams] = useSearchParams();
-    const [selectedCategory, setSelectedCategory] = useState('All');
+    const [selectedCountry, setSelectedCountry] = useState('All');
     const [filters, setFilters] = useState<FilterState>({
-        priceRange: [0, 5000],
+        scoreRange: [0, 1000],
         rating: 0,
         categories: [],
     });
@@ -43,14 +43,18 @@ export default function Home() {
         const pages = (data?.pages ?? []) as Destination[][] | Destination[];
         // If backend returns arrays per page: flatten; if single array: coerce
         const flat = Array.isArray(pages[0]) ? (pages as Destination[][]).flat() : (pages as Destination[]);
-        // Apply client-side filters (optional): search/category/basic filters
+        // Apply client-side filters (optional): search/country/basic filters
         return flat.filter((dest) => {
-            const matchesSearch = selectedCategory === 'All' // placeholder; search handled below
-                ? true
-                : dest.categories?.includes?.(selectedCategory);
-            return matchesSearch;
+            if (selectedCountry === 'All') return true;
+
+            const country = countries.find(c => c.label === selectedCountry);
+            if (!country || country.keywords.length === 0) return true;
+
+            const locationLower = (dest.location || '').toLowerCase();
+            const matchesCountry = country.keywords.some(keyword => locationLower.includes(keyword));
+            return matchesCountry;
         });
-    }, [data?.pages, selectedCategory]);
+    }, [data?.pages, selectedCountry, filters]);
 
     const searchQuery = searchParams.get('search') || '';
 
@@ -124,17 +128,17 @@ export default function Home() {
                     </div>
                 </section>
 
-                {/* Categories */}
+                {/* Countries */}
                 <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <ScrollArea className="w-full whitespace-nowrap">
                         <div className="flex space-x-3 pb-4">
-                            {categories.map((category) => (
+                            {countries.map((country) => (
                                 <CategoryChip
-                                    key={category.label}
-                                    label={category.label}
-                                    icon={category.icon}
-                                    active={selectedCategory === category.label}
-                                    onClick={() => setSelectedCategory(category.label)}
+                                    key={country.label}
+                                    label={country.label}
+                                    icon={country.icon}
+                                    active={selectedCountry === country.label}
+                                    onClick={() => setSelectedCountry(country.label)}
                                 />
                             ))}
                         </div>
@@ -160,8 +164,8 @@ export default function Home() {
                     )}
                     {status === 'success' && destinations.length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            {destinations.map((destination) => (
-                                <DestinationCard key={destination.id} destination={destination} />
+                            {destinations.map((destination, index) => (
+                                <DestinationCard key={destination.place_id ?? destination.id ?? index} destination={destination} />
                             ))}
                         </div>
                     ) : (
