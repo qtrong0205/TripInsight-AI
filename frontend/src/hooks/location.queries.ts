@@ -1,5 +1,6 @@
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { fetchLocations, getLocationById } from "../api/location.api";
+import { DestinationFilters } from "../data/destinations";
 
 export const useLocationQuery = (placeId?: string | null) => {
     return useQuery({
@@ -10,14 +11,19 @@ export const useLocationQuery = (placeId?: string | null) => {
     });
 };
 
-export const useLocationsInfinite = () => {
+export const useLocationsInfinite = (filters: DestinationFilters) => {
     return useInfiniteQuery({
-        queryKey: ["locations"],
-        queryFn: fetchLocations,
+        queryKey: ["locations", filters],
+        queryFn: ({ pageParam = 1 }) =>
+            fetchLocations({
+                pageParam,
+                ...filters,
+            }),
         initialPageParam: 1,
-        getNextPageParam: (lastPage) => (lastPage?.hasMore ? lastPage.nextPage : undefined),
+        getNextPageParam: (lastPage) =>
+            lastPage?.hasMore ? lastPage.nextPage : undefined,
         select: (data) => ({
-            pages: data.pages.map((p: any) => (p?.data ?? p)),
+            pages: data.pages.map((p: any) => p.data),
             pageParams: data.pageParams,
             hasMore: data.pages[data.pages.length - 1]?.hasMore ?? false,
         }),

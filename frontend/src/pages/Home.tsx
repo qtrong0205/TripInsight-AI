@@ -28,6 +28,17 @@ export default function Home() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const bottomRef = useRef<HTMLDivElement | null>(null);
 
+    const apiFilters = useMemo(() => {
+        return {
+            categories: filters.categories,       // string[]
+            rating: filters.rating || undefined,  // number | undefined
+            sentimentScore:
+                filters.scoreRange[0] > 0
+                    ? filters.scoreRange[0]
+                    : undefined,
+            // sort: 'popular' | 'rating' | 'newest'
+        };
+    }, [filters]);
 
     const {
         data,
@@ -36,7 +47,7 @@ export default function Home() {
         isFetchingNextPage,
         status,
         error,
-    } = useLocationsInfinite();
+    } = useLocationsInfinite(apiFilters);
 
     // Flatten pages from infinite query; ensure array type
     const destinations: Destination[] = useMemo(() => {
@@ -54,7 +65,7 @@ export default function Home() {
             const matchesCountry = country.keywords.some(keyword => locationLower.includes(keyword));
             return matchesCountry;
         });
-    }, [data?.pages, selectedCountry, filters]);
+    }, [data?.pages, selectedCountry]);
 
     const searchQuery = searchParams.get('search') || '';
 

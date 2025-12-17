@@ -19,7 +19,7 @@ export default function Sidebar({ setFilters }: SidebarProps) {
     const [rating, setRating] = useState(0);
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
-    const categories = ['Tourism', 'Attraction', 'Sights', 'Nature', 'Historic', 'Cultural'];
+    const categories = ['Tourism', 'Attraction', 'Building', 'Natural', 'Heritage', 'Beach'];
 
     const handleCategoryToggle = (category: string) => {
         const newCategories = selectedCategories.includes(category)
@@ -93,7 +93,7 @@ export default function Sidebar({ setFilters }: SidebarProps) {
                         value={scoreRange}
                         onValueChange={handleSentimentScoreChange}
                         max={100}
-                        step={5}
+                        step={1}
                         className="w-full"
                     />
                     <div className="flex justify-between text-sm text-muted-foreground">
