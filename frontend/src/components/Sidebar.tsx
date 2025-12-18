@@ -1,12 +1,15 @@
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Star } from 'lucide-react';
+import { Star, Clock, TrendingUp, StarIcon } from 'lucide-react';
+
+export type SortOption = 'newest' | 'popular' | 'rating';
 
 export interface FilterState {
     scoreRange: [number, number];
     rating: number;
     categories: string[];
+    sort: SortOption;
 }
 
 interface SidebarProps {
@@ -16,6 +19,12 @@ interface SidebarProps {
 
 export default function Sidebar({ filters, setFilters }: SidebarProps) {
     const categories = ['Tourism', 'Attraction', 'Building', 'Natural', 'Heritage', 'Beach'];
+
+    const sortOptions: { value: SortOption; label: string; icon: React.ReactNode }[] = [
+        { value: 'newest', label: 'Newest', icon: <Clock className="w-4 h-4" strokeWidth={2} /> },
+        { value: 'popular', label: 'Most Popular', icon: <TrendingUp className="w-4 h-4" strokeWidth={2} /> },
+        { value: 'rating', label: 'Highest Rated', icon: <StarIcon className="w-4 h-4" strokeWidth={2} /> },
+    ];
 
     const handleCategoryToggle = (category: string) => {
         const newCategories = filters.categories.includes(category)
@@ -33,11 +42,16 @@ export default function Sidebar({ filters, setFilters }: SidebarProps) {
         setFilters({ ...filters, rating: newRating });
     };
 
+    const handleSortChange = (sort: SortOption) => {
+        setFilters({ ...filters, sort });
+    };
+
     const handleReset = () => {
         setFilters({
             scoreRange: [0, 100],
             rating: 0,
             categories: [],
+            sort: 'newest',
         });
     };
 
@@ -98,6 +112,28 @@ export default function Sidebar({ filters, setFilters }: SidebarProps) {
                                 fill={i < filters.rating ? 'currentColor' : 'none'}
                             />
                         </button>
+                    ))}
+                </div>
+            </div>
+
+            <Separator className="bg-border" />
+
+            <div>
+                <h3 className="font-semibold text-lg mb-4 text-card-foreground">Sort By</h3>
+                <div className="space-y-2">
+                    {sortOptions.map((option) => (
+                        <Button
+                            key={option.value}
+                            onClick={() => handleSortChange(option.value)}
+                            variant="ghost"
+                            className={`w-full justify-start font-normal gap-2 ${filters.sort === option.value
+                                ? 'bg-neutral text-primary'
+                                : 'text-card-foreground hover:bg-neutral hover:text-card-foreground'
+                                }`}
+                        >
+                            {option.icon}
+                            {option.label}
+                        </Button>
                     ))}
                 </div>
             </div>

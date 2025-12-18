@@ -22,9 +22,10 @@ export default function Home() {
     const [searchParams] = useSearchParams();
     const [selectedCountry, setSelectedCountry] = useState('All');
     const [filters, setFilters] = useState<FilterState>({
-        scoreRange: [0, 1000],
+        scoreRange: [0, 100],
         rating: 0,
         categories: [],
+        sort: 'newest',
     });
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const bottomRef = useRef<HTMLDivElement | null>(null);
@@ -37,7 +38,7 @@ export default function Home() {
                 filters.scoreRange[0] > 0
                     ? filters.scoreRange[0]
                     : undefined,
-            // sort: 'popular' | 'rating' | 'newest'
+            sort: filters.sort,
         };
     }, [filters]);
 
