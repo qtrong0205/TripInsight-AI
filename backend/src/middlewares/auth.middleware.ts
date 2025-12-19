@@ -1,25 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
 import z from 'zod';
+import supabase from '../config/supabase';
 
 export interface AuthRequest extends Request {
     user?: {
         id: string;
+        role: string;
     };
 }
 
-function decodeJwtPayload(token: string): any | null {
-    try {
-        const parts = token.split('.');
-        if (parts.length < 2) return null;
-        const payload = parts[1];
-        const json = Buffer.from(payload, 'base64url').toString('utf8');
-        return JSON.parse(json);
-    } catch {
-        return null;
-    }
-}
-
-export const requireAuth = (
+export const requireAuth = async (
     req: AuthRequest,
     res: Response,
     next: NextFunction
@@ -32,16 +22,29 @@ export const requireAuth = (
 
     const token = authHeader.split(' ')[1];
 
-    const payload: any = decodeJwtPayload(token);
-    const userId = payload?.sub;
-
-    if (!userId) {
-        return res.status(401).json({ message: 'Invalid token' });
+    const { data, error } = await supabase.auth.getUser(token);
+    if (error || !data.user) {
+        return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    req.user = { id: userId };
+    const { data: profile, error: profileError } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', data.user.id)
+        .single();
+
+    if (profileError || !profile?.role) {
+        return res.status(403).json({ message: 'Forbidden' });
+    }
+
+    req.user = {
+        id: data.user.id,
+        role: profile.role,
+    };
+
     next();
 };
+
 
 const signupSchema = z.object({
     id: z.string().uuid(),
