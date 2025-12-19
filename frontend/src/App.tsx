@@ -11,6 +11,8 @@ import Profile from './pages/Profile';
 import Register from './pages/Register';
 import EditProfile from './pages/UpdateProfile';
 import SignupFailed from './pages/SignUpFailed';
+import AdminDashboard from './pages/admin/Dashboard';
+import DestinationForm from './pages/admin/DestinationForm';
 
 const queryClient = new QueryClient();
 
@@ -30,6 +32,8 @@ function App() {
                                 <Route path="/signup-status" element={<SignupFailed />} />
                                 <Route path="/profile" element={<Profile />} />
                                 <Route path="/edit-profile" element={<EditProfile />} />
+                                <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                                <Route path="/admin/destinations/new" element={<DestinationForm />} />
                             </Routes>
                         </AppShell>
                     </FavoritesProvider>

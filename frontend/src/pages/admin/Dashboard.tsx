@@ -1,0 +1,183 @@
+import { useEffect } from 'react';
+import { TrendingUp, MapPin, Star, Plus } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+
+export default function AdminDashboard() {
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
+    const stats = [
+        {
+            title: 'Total Destinations',
+            value: '248',
+            change: '+12 this month',
+            icon: MapPin,
+            color: 'text-blue-600',
+            bgColor: 'bg-blue-50',
+        },
+        {
+            title: 'Featured Destinations',
+            value: '32',
+            change: '4 active campaigns',
+            icon: Star,
+            color: 'text-amber-600',
+            bgColor: 'bg-amber-50',
+        },
+        {
+            title: 'Recently Added',
+            value: '18',
+            change: 'Last 7 days',
+            icon: TrendingUp,
+            color: 'text-emerald-600',
+            bgColor: 'bg-emerald-50',
+        },
+    ];
+
+    const recentDestinations = [
+        { name: 'Santorini Sunset Tour', location: 'Greece', status: 'Active', date: '2024-03-20' },
+        { name: 'Tokyo Night Markets', location: 'Japan', status: 'Active', date: '2024-03-19' },
+        { name: 'Swiss Alps Adventure', location: 'Switzerland', status: 'Inactive', date: '2024-03-18' },
+        { name: 'Bali Beach Resort', location: 'Indonesia', status: 'Active', date: '2024-03-17' },
+    ];
+
+    return (
+        <div className="pt-20 md:pt-2 min-h-screen bg-gray-50">
+            {/* Header */}
+            <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+                <div className="px-4 sm:px-6 lg:px-8 py-6 lg:ml-0">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+                            <p className="text-gray-500 mt-1">Welcome back, Admin</p>
+                        </div>
+                        <Link to="/admin/destinations/new">
+                            <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
+                                <Plus className="w-4 h-4 mr-2" strokeWidth={2} />
+                                Add Destination
+                            </Button>
+                        </Link>
+                    </div>
+                </div>
+            </div>
+
+            {/* Main Content */}
+            <div className="px-4 sm:px-6 lg:px-8 py-8">
+                {/* Stats Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    {stats.map((stat, index) => (
+                        <Card key={index} className="bg-white border-gray-200 hover:shadow-md transition-shadow">
+                            <CardContent className="p-6">
+                                <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                        <p className="text-sm font-medium text-gray-600 mb-1">{stat.title}</p>
+                                        <h3 className="text-3xl font-bold text-gray-900 mb-2">{stat.value}</h3>
+                                        <p className="text-sm text-gray-500">{stat.change}</p>
+                                    </div>
+                                    <div className={`${stat.bgColor} ${stat.color} p-3 rounded-xl`}>
+                                        <stat.icon className="w-6 h-6" strokeWidth={2} />
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+
+                {/* Two Column Layout */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Recent Activity */}
+                    <Card className="lg:col-span-2 bg-white border-gray-200">
+                        <CardHeader className="border-b border-gray-100 px-6 py-4">
+                            <div className="flex items-center justify-between">
+                                <CardTitle className="text-lg font-semibold text-gray-900">
+                                    Recent Destinations
+                                </CardTitle>
+                                <Link to="/admin/destinations">
+                                    <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
+                                        View All
+                                    </Button>
+                                </Link>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="p-0">
+                            <div className="divide-y divide-gray-100">
+                                {recentDestinations.map((dest, index) => (
+                                    <div key={index} className="px-6 py-4 hover:bg-gray-50 transition-colors">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex-1">
+                                                <h4 className="font-medium text-gray-900 mb-1">{dest.name}</h4>
+                                                <div className="flex items-center gap-4 text-sm text-gray-500">
+                                                    <span className="flex items-center gap-1">
+                                                        <MapPin className="w-3.5 h-3.5" strokeWidth={2} />
+                                                        {dest.location}
+                                                    </span>
+                                                    <span>{dest.date}</span>
+                                                </div>
+                                            </div>
+                                            <span
+                                                className={`px-3 py-1 rounded-full text-xs font-medium ${dest.status === 'Active'
+                                                    ? 'bg-emerald-50 text-emerald-700'
+                                                    : 'bg-red-100 text-red-600'
+                                                    }`}
+                                            >
+                                                {dest.status}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Quick Stats */}
+                    <Card className="bg-white border-gray-200">
+                        <CardHeader className="border-b border-gray-100 px-6 py-4">
+                            <CardTitle className="text-lg font-semibold text-gray-900">Quick Stats</CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-6">
+                            <div className="space-y-6">
+                                <div>
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="text-sm font-medium text-gray-600">Active Destinations</span>
+                                        <span className="text-sm font-bold text-gray-900">230</span>
+                                    </div>
+                                    <div className="w-full bg-gray-100 rounded-full h-2">
+                                        <div className="bg-blue-600 h-2 rounded-full" style={{ width: '92%' }}></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="text-sm font-medium text-gray-600">Inactive Destinations</span>
+                                        <span className="text-sm font-bold text-gray-900">18</span>
+                                    </div>
+                                    <div className="w-full bg-gray-100 rounded-full h-2">
+                                        <div className="bg-amber-500 h-2 rounded-full" style={{ width: '8%' }}></div>
+                                    </div>
+                                </div>
+                                <div className="pt-4 border-t border-gray-100">
+                                    <h4 className="text-sm font-medium text-gray-600 mb-3">Top Categories</h4>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between text-sm">
+                                            <span className="text-gray-700">Beach</span>
+                                            <span className="font-medium text-gray-900">64</span>
+                                        </div>
+                                        <div className="flex items-center justify-between text-sm">
+                                            <span className="text-gray-700">Mountain</span>
+                                            <span className="font-medium text-gray-900">52</span>
+                                        </div>
+                                        <div className="flex items-center justify-between text-sm">
+                                            <span className="text-gray-700">City</span>
+                                            <span className="font-medium text-gray-900">48</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+        </div>
+    );
+}
