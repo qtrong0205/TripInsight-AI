@@ -49,5 +49,22 @@ export const locationController = {
         } catch (error: any) {
             res.status(400).json({ success: false, message: error.message });
         }
+    },
+    setActiveState: async (req: Request, res: Response) => {
+        try {
+            const id = req.params.id
+            const { active } = req.body
+            if (typeof active !== 'boolean') {
+                return res.status(400).json({
+                    success: false,
+                    message: 'active must be boolean',
+                });
+            }
+
+            const updatedLocation = await locationService.setActiveState(id, active)
+            res.status(200).json({ success: true, data: updatedLocation });
+        } catch (error: any) {
+            res.status(400).json({ success: false, message: error.message });
+        }
     }
 }

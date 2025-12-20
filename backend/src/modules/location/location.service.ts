@@ -32,5 +32,11 @@ export const locationService = {
         const data = await locationModel.getSimilarLocations(id)
         if (!data) throw new Error('Failed to fetch');
         return data;
+    },
+    setActiveState: async (id: string, active: boolean) => {
+        if (!id) throw new Error('Place id is required');
+        const data = await locationModel.setActiveState(id, active)
+        if (!data) throw new Error('Failed to update');
+        return data;
     }
 }

@@ -34,10 +34,12 @@ export const favoriteModel = {
                 categories,
                 avg_sentiment_score,
                 reviews,
-                embed_map_url
+                embed_map_url,
+                active
             )
             `)
             .eq("user_id", userId)
+            .eq("places.active", true)
             .limit(10)
         if (error) throw error
         return data

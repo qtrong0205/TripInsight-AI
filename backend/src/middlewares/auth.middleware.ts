@@ -45,6 +45,16 @@ export const requireAuth = async (
     next();
 };
 
+export const requireAdmin = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+) => {
+    if (req.user?.role != "admin") {
+        return res.status(403).json({ message: "Forbidden" })
+    }
+    next()
+}
 
 const signupSchema = z.object({
     id: z.string().uuid(),

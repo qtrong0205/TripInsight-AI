@@ -5,7 +5,8 @@ export const locationModel = {
     getAllLocations: async (from: number, to: number, filters: DestinationFilters) => {
         let query = supabase
             .from("places")
-            .select("*", { count: "exact" });
+            .select("*", { count: "exact" })
+            .eq("active", true);
 
         // filter
         if (filters?.categories) {
@@ -40,7 +41,6 @@ export const locationModel = {
 
         return { data, count };
     },
-
     getLocationById: async (id: string) => {
         const { data, error } = await supabase
             .from('places')
@@ -69,5 +69,18 @@ export const locationModel = {
             .limit(4);
         if (similarError) throw similarError;
         return similar ?? []
+    },
+    setActiveState: async (id: string, active: boolean) => {
+        const { data, error } = await supabase
+            .from('places')
+            .update({ active })
+            .eq('place_id', id)
+            .select()
+            .single();
+        if (error) {
+            throw error
+        }
+
+        return data;
     }
 };
