@@ -84,23 +84,51 @@ export const locationModel = {
         return data;
     },
     getLocationStat: async () => {
+        const now = new Date();
+
+        const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+
         const [
             totalRes,
             activeRes,
             inactiveRes,
             featuredRes,
+            recent7DaysRes,
+            thisMonthRes,
+            lastMonthRes,
         ] = await Promise.all([
             supabase.from("places").select("*", { count: "exact", head: true }),
             supabase.from("places").select("*", { count: "exact", head: true }).eq("active", true),
             supabase.from("places").select("*", { count: "exact", head: true }).eq("active", false),
             supabase.from("places").select("*", { count: "exact", head: true }).eq("is_featured", true),
+            supabase
+                .from("places")
+                .select("*", { count: "exact", head: true })
+                .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
+            supabase
+                .from("places")
+                .select("*", { count: "exact", head: true })
+                .gte("created_at", startOfThisMonth.toISOString()),
+            supabase
+                .from("places")
+                .select("*", { count: "exact", head: true })
+                .gte("created_at", startOfLastMonth.toISOString())
+                .lte("created_at", endOfLastMonth.toISOString()),
         ]);
+
+        const thisMonth = thisMonthRes.count ?? 0;
+        const lastMonth = lastMonthRes.count ?? 0;
+        const monthlyChange = thisMonth - lastMonth;
 
         return {
             total: totalRes.count ?? 0,
             active: activeRes.count ?? 0,
             inactive: inactiveRes.count ?? 0,
             featured: featuredRes.count ?? 0,
+            recent: recent7DaysRes.count ?? 0,
+            monthlyChange, //
         };
     }
 };
