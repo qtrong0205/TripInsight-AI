@@ -1,5 +1,5 @@
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
-import { fetchLocations, getLocationById } from "../api/location.api";
+import { fetchLocations, getLocationById, getLocationStat } from "../api/location.api";
 import { DestinationFilters } from "../data/destinations";
 
 export const useLocationQuery = (placeId?: string | null) => {
@@ -29,3 +29,11 @@ export const useLocationsInfinite = (filters: DestinationFilters) => {
         }),
     });
 };
+
+export const useLocationStat = (token: string) => {
+    return useQuery({
+        queryKey: ["location-stat", token],
+        queryFn: getLocationStat,
+        select: (res: any) => (res?.data ?? res),
+    })
+}

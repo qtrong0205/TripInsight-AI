@@ -64,3 +64,24 @@ export const fetchLocations = async ({
 
     return res.json(); // { data, nextPage, hasMore }
 };
+
+export const getLocationStat = async ({ queryKey }) => {
+    const [, token] = queryKey;
+    if (!token) {
+        throw new Error("Missing access token");
+    }
+
+    const res = await fetch(`${backendUrl}/locations/admin/stat`, {
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+        },
+    });
+
+    if (!res.ok) {
+        throw new Error("Failed to fetch location stat");
+    }
+
+    return res.json();
+};

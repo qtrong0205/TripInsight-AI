@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, Menu, X, User, Heart, LogOut } from 'lucide-react';
+import { Search, Menu, X, User, Heart, LogOut, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -97,6 +97,22 @@ export default function TopBar({ onSearch }: TopBarProps) {
                                         Favorites
                                     </Link>
                                 </NavigationMenuItem>
+                                {user?.role === "admin"
+                                    ?
+                                    <NavigationMenuItem>
+                                        <Link
+                                            to="/admin/dashboard"
+                                            className={`px-4 py-2 text-sm font-medium transition-colors hover:text-primary cursor-pointer flex items-center gap-2 ${isActive('/admin/dashboard') ? 'text-primary' : 'text-foreground'
+                                                }`}
+                                        >
+                                            <Shield className="w-4 h-4" strokeWidth={2} />
+                                            Dashboard
+                                        </Link>
+                                    </NavigationMenuItem>
+                                    :
+                                    <></>
+                                }
+
                             </NavigationMenuList>
                         </NavigationMenu>
 

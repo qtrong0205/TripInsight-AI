@@ -2,33 +2,54 @@ import { useEffect } from 'react';
 import { TrendingUp, MapPin, Star, Plus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/useAuth';
+import { useLocationStat } from '../../hooks/location.queries';
+
+interface StatInterface {
+    active: number;
+    featured: number;
+    inactive: number;
+    monthlyChange: number;
+    recent: number;
+    total: number;
+}
 
 export default function AdminDashboard() {
+    const { user } = useAuth()
+    const navigate = useNavigate();
     useEffect(() => {
-        window.scrollTo(0, 0);
-    }, []);
+        if (!user) return;
+        if (user.role !== "admin") navigate("/");
+    }, [user]);
+
+    const { data, isLoading, error } = useLocationStat(
+        user?.access_token
+    ) as {
+        data: StatInterface | undefined;
+        isLoading: boolean;
+        error: unknown;
+    };
 
     const stats = [
         {
             title: 'Total Destinations',
-            value: '248',
-            change: '+12 this month',
+            value: data.total,
+            change: `+${data.monthlyChange} this month`,
             icon: MapPin,
             color: 'text-blue-600',
             bgColor: 'bg-blue-50',
         },
         {
             title: 'Featured Destinations',
-            value: '32',
-            change: '4 active campaigns',
+            value: data.featured,
             icon: Star,
             color: 'text-amber-600',
             bgColor: 'bg-amber-50',
         },
         {
             title: 'Recently Added',
-            value: '18',
+            value: data.recent,
             change: 'Last 7 days',
             icon: TrendingUp,
             color: 'text-emerald-600',
@@ -141,19 +162,19 @@ export default function AdminDashboard() {
                                 <div>
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-sm font-medium text-gray-600">Active Destinations</span>
-                                        <span className="text-sm font-bold text-gray-900">230</span>
+                                        <span className="text-sm font-bold text-gray-900">{data.active}</span>
                                     </div>
                                     <div className="w-full bg-gray-100 rounded-full h-2">
-                                        <div className="bg-blue-600 h-2 rounded-full" style={{ width: '92%' }}></div>
+                                        <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${data.active}%` }}></div>
                                     </div>
                                 </div>
                                 <div>
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-sm font-medium text-gray-600">Inactive Destinations</span>
-                                        <span className="text-sm font-bold text-gray-900">18</span>
+                                        <span className="text-sm font-bold text-gray-900">{data.inactive}</span>
                                     </div>
                                     <div className="w-full bg-gray-100 rounded-full h-2">
-                                        <div className="bg-amber-500 h-2 rounded-full" style={{ width: '8%' }}></div>
+                                        <div className="bg-amber-500 h-2 rounded-full" style={{ width: `${data.inactive}%` }}></div>
                                     </div>
                                 </div>
                                 <div className="pt-4 border-t border-gray-100">
