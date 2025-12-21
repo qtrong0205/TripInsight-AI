@@ -66,5 +66,13 @@ export const locationController = {
         } catch (error: any) {
             res.status(400).json({ success: false, message: error.message });
         }
+    },
+    getLocationStat: async (req: Request, res: Response) => {
+        try {
+            const stat = await locationService.getLocationStat()
+            res.status(200).json({ success: true, data: stat });
+        } catch (error: any) {
+            res.status(500).json({ success: false, message: error.message });
+        }
     }
 }

@@ -82,5 +82,25 @@ export const locationModel = {
         }
 
         return data;
+    },
+    getLocationStat: async () => {
+        const [
+            totalRes,
+            activeRes,
+            inactiveRes,
+            featuredRes,
+        ] = await Promise.all([
+            supabase.from("places").select("*", { count: "exact", head: true }),
+            supabase.from("places").select("*", { count: "exact", head: true }).eq("active", true),
+            supabase.from("places").select("*", { count: "exact", head: true }).eq("active", false),
+            supabase.from("places").select("*", { count: "exact", head: true }).eq("is_featured", true),
+        ]);
+
+        return {
+            total: totalRes.count ?? 0,
+            active: activeRes.count ?? 0,
+            inactive: inactiveRes.count ?? 0,
+            featured: featuredRes.count ?? 0,
+        };
     }
 };

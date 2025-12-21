@@ -38,5 +38,10 @@ export const locationService = {
         const data = await locationModel.setActiveState(id, active)
         if (!data) throw new Error('Failed to update');
         return data;
+    },
+    getLocationStat: async () => {
+        const data = await locationModel.getLocationStat();
+        if (!data) throw new Error('Failed to fetch');
+        return data;
     }
 }
