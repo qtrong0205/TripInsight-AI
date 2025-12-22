@@ -18,10 +18,17 @@ interface StatInterface {
 export default function AdminDashboard() {
     const { user } = useAuth()
     const navigate = useNavigate();
+
     useEffect(() => {
-        if (!user) return;
-        if (user.role !== "admin") navigate("/");
-    }, [user]);
+        if (user === null) {
+            // User is not logged in, redirect to login
+            navigate("/login");
+            return;
+        }
+        if (user && user.role !== "admin") {
+            navigate("/");
+        }
+    }, [user, navigate]);
 
     const { data, isLoading, error } = useLocationStat(
         user?.access_token
@@ -31,25 +38,48 @@ export default function AdminDashboard() {
         error: unknown;
     };
 
+    // Show loading state while user or data is loading
+    if (!user || isLoading) {
+        return (
+            <div className="pt-20 md:pt-2 min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <p className="text-gray-500">Loading dashboard...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Show error state
+    if (error) {
+        return (
+            <div className="pt-20 md:pt-2 min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center text-red-600">
+                    <p>Error loading dashboard data</p>
+                </div>
+            </div>
+        );
+    }
+
     const stats = [
         {
             title: 'Total Destinations',
-            value: data.total,
-            change: `+${data.monthlyChange} this month`,
+            value: data?.total ?? 0,
+            change: `+${data?.monthlyChange ?? 0} this month`,
             icon: MapPin,
             color: 'text-blue-600',
             bgColor: 'bg-blue-50',
         },
         {
             title: 'Featured Destinations',
-            value: data.featured,
+            value: data?.featured ?? 0,
             icon: Star,
             color: 'text-amber-600',
             bgColor: 'bg-amber-50',
         },
         {
             title: 'Recently Added',
-            value: data.recent,
+            value: data?.recent ?? 0,
             change: 'Last 7 days',
             icon: TrendingUp,
             color: 'text-emerald-600',
@@ -162,19 +192,19 @@ export default function AdminDashboard() {
                                 <div>
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-sm font-medium text-gray-600">Active Destinations</span>
-                                        <span className="text-sm font-bold text-gray-900">{data.active}</span>
+                                        <span className="text-sm font-bold text-gray-900">{data?.active ?? 0}</span>
                                     </div>
                                     <div className="w-full bg-gray-100 rounded-full h-2">
-                                        <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${data.active}%` }}></div>
+                                        <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${data?.active ?? 0}%` }}></div>
                                     </div>
                                 </div>
                                 <div>
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-sm font-medium text-gray-600">Inactive Destinations</span>
-                                        <span className="text-sm font-bold text-gray-900">{data.inactive}</span>
+                                        <span className="text-sm font-bold text-gray-900">{data?.inactive ?? 0}</span>
                                     </div>
                                     <div className="w-full bg-gray-100 rounded-full h-2">
-                                        <div className="bg-amber-500 h-2 rounded-full" style={{ width: `${data.inactive}%` }}></div>
+                                        <div className="bg-amber-500 h-2 rounded-full" style={{ width: `${data?.inactive ?? 0}%` }}></div>
                                     </div>
                                 </div>
                                 <div className="pt-4 border-t border-gray-100">
