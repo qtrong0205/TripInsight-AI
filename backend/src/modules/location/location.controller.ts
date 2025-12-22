@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { locationService } from './location.service';
+import { buildPlaceData, buildStaticMapUrl } from '../../service/place.service';
 
 export const locationController = {
     getAllLocations: async (req: Request, res: Response) => {
@@ -71,6 +72,63 @@ export const locationController = {
         try {
             const stat = await locationService.getLocationStat()
             res.status(200).json({ success: true, data: stat });
+        } catch (error: any) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    },
+    createNewPlace: async (req: Request, res: Response) => {
+        try {
+            const { name, location, description, images, isFeatured, active, categories } = req.body
+
+            // Validate required fields
+            if (!name?.trim()) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Name is required',
+                });
+            }
+            if (!location?.trim()) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Location is required',
+                });
+            }
+            if (!description?.trim()) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Description is required',
+                });
+            }
+
+            const placeData = await buildPlaceData(name, location)
+            if (!placeData) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Could not find location data for the given place',
+                });
+            }
+
+            const { destName, lat, lon } = placeData
+            const embedMapUrl = buildStaticMapUrl(lat, lon)
+
+            // Create location in database
+            const newLocation = await locationService.createLocation({
+                name: destName,
+                location: location,
+                description,
+                images: images ?? [],
+                categories: categories ?? [],
+                lat,
+                lon,
+                embedMapUrl,
+                isFeatured: isFeatured ?? false,
+                active: active ?? true,
+            });
+
+            res.status(201).json({
+                success: true,
+                data: newLocation,
+            });
         } catch (error: any) {
             res.status(500).json({ success: false, message: error.message });
         }

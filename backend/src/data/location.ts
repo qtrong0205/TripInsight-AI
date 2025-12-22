@@ -26,6 +26,24 @@ export interface Destination {
     sentimentScore: number;
 }
 
+export interface InsertedDestination {
+    name: string;
+    slug: string;
+    location: string;
+    image: string[];
+    categories: string[];
+    description: string;
+    lat: number;
+    lon: number;
+    embed_map_url: string;
+    is_featured?: boolean;
+    active?: boolean;
+    rating?: number;
+    avg_sentiment_score?: number;
+    reviews?: number;
+    created_at?: string;
+}
+
 export interface DestinationFilters {
     categories?: string;
     rating?: number;

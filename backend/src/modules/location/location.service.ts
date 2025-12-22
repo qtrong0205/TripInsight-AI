@@ -1,5 +1,6 @@
-import { DestinationFilters } from "../../data/location";
+import { DestinationFilters, InsertedDestination } from "../../data/location";
 import { locationModel } from "./location.model";
+import { generateUniqueSlug } from "../../service/place.service";
 
 export const locationService = {
     getAllLocations: async (page: number, limit: number, filters: DestinationFilters) => {
@@ -43,5 +44,49 @@ export const locationService = {
         const data = await locationModel.getLocationStat();
         if (!data) throw new Error('Failed to fetch');
         return data;
-    }
+    },
+
+    createLocation: async (input: {
+        name: string;
+        location: string;
+        description: string;
+        images: string[];
+        categories: string[];
+        lat: number;
+        lon: number;
+        embedMapUrl: string;
+        isFeatured?: boolean;
+        active?: boolean;
+    }) => {
+        // Validate required fields
+        if (!input.name?.trim()) throw new Error('Name is required');
+        if (!input.location?.trim()) throw new Error('Location is required');
+        if (!input.description?.trim()) throw new Error('Description is required');
+
+        // Generate unique slug
+        const slug = await generateUniqueSlug(input.name);
+
+        // Build destination object
+        const destination: InsertedDestination = {
+            name: input.name.trim(),
+            slug,
+            location: input.location.trim(),
+            description: input.description.trim(),
+            image: input.images ?? [],
+            categories: input.categories ?? [],
+            lat: input.lat,
+            lon: input.lon,
+            embed_map_url: input.embedMapUrl,
+            is_featured: input.isFeatured ?? false,
+            active: input.active ?? true,
+            rating: 0,
+            avg_sentiment_score: 0,
+            reviews: 0,
+            created_at: new Date().toISOString(),
+        };
+
+        const data = await locationModel.createLocation(destination);
+        if (!data) throw new Error('Failed to create location');
+        return data;
+    },
 }

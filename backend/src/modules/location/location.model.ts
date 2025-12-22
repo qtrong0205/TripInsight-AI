@@ -1,5 +1,5 @@
 import supabase from "../../config/supabase";
-import { DestinationFilters } from "../../data/location";
+import { DestinationFilters, InsertedDestination } from "../../data/location";
 
 export const locationModel = {
     getAllLocations: async (from: number, to: number, filters: DestinationFilters) => {
@@ -128,7 +128,18 @@ export const locationModel = {
             inactive: inactiveRes.count ?? 0,
             featured: featuredRes.count ?? 0,
             recent: recent7DaysRes.count ?? 0,
-            monthlyChange, //
+            monthlyChange,
         };
+    },
+
+    createLocation: async (destination: InsertedDestination) => {
+        const { data, error } = await supabase
+            .from('places')
+            .insert(destination)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
     }
 };
