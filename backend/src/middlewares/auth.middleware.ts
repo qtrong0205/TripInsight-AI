@@ -65,6 +65,35 @@ const signupSchema = z.object({
         .max(20),
 });
 
+const createLocationSchema = z.object({
+    name: z
+        .string()
+        .trim()
+        .min(3, "Name is too short")
+        .max(100, "Name is too long"),
+
+    location: z
+        .string()
+        .trim()
+        .min(5, "Location is too short")
+        .max(255, "Location is too long"),
+
+    description: z
+        .string()
+        .trim()
+        .min(10, "Description is too short")
+        .max(2000, "Description is too long"),
+
+    images: z.array(z.string().url()).optional(),
+
+    categories: z.array(z.string()).optional(),
+
+    isFeatured: z.boolean().optional(),
+
+    active: z.boolean().optional(),
+});
+
+
 export const validateSignup = (req: Request, res: Response, next: NextFunction) => {
     const result = signupSchema.safeParse(req.body);
 
@@ -78,3 +107,15 @@ export const validateSignup = (req: Request, res: Response, next: NextFunction) 
     next();
 };
 
+export const ValidateCreateLocation = (req: Request, res: Response, next: NextFunction) => {
+    const result = createLocationSchema.safeParse(req.body);
+
+    if (!result.success) {
+        return res.status(400).json({
+            errors: result.error.format(),
+        });
+    }
+
+    req.body = result.data;
+    next();
+}

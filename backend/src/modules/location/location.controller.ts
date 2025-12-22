@@ -76,29 +76,9 @@ export const locationController = {
             res.status(500).json({ success: false, message: error.message });
         }
     },
-    createNewPlace: async (req: Request, res: Response) => {
+    createLocation: async (req: Request, res: Response) => {
         try {
             const { name, location, description, images, isFeatured, active, categories } = req.body
-
-            // Validate required fields
-            if (!name?.trim()) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Name is required',
-                });
-            }
-            if (!location?.trim()) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Location is required',
-                });
-            }
-            if (!description?.trim()) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Description is required',
-                });
-            }
 
             const placeData = await buildPlaceData(name, location)
             if (!placeData) {
@@ -109,7 +89,7 @@ export const locationController = {
             }
 
             const { destName, lat, lon } = placeData
-            const embedMapUrl = buildStaticMapUrl(lat, lon)
+            const staticMapUrl = buildStaticMapUrl(lat, lon)
 
             // Create location in database
             const newLocation = await locationService.createLocation({
@@ -120,7 +100,7 @@ export const locationController = {
                 categories: categories ?? [],
                 lat,
                 lon,
-                embedMapUrl,
+                staticMapUrl,
                 isFeatured: isFeatured ?? false,
                 active: active ?? true,
             });
