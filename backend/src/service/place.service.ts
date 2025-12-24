@@ -2,7 +2,6 @@ import { searchPlaceGeoapify } from "./geoapify.service";
 import supabase from "../config/supabase";
 
 interface PlaceLocationResult {
-    destName: string;
     lat: number;
     lon: number;
 }
@@ -107,7 +106,6 @@ export async function buildPlaceData(name: string, location: string): Promise<Pl
     }
 
     return {
-        destName: props.name ?? name,
         lat: props.lat,
         lon: props.lon,
     };

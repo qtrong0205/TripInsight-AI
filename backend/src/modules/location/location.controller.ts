@@ -88,12 +88,12 @@ export const locationController = {
                 });
             }
 
-            const { destName, lat, lon } = placeData
+            const { lat, lon } = placeData
             const staticMapUrl = buildStaticMapUrl(lat, lon)
 
             // Create location in database
             const newLocation = await locationService.createLocation({
-                name: destName,
+                name: name,
                 location: location,
                 description,
                 images: images ?? [],
