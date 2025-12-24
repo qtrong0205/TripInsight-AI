@@ -131,7 +131,7 @@ async function buildPlaceData(name: string) {
     const wiki = await getWikiSummary(name);
 
     // 5. Build data object
-    const embedMapUrl = `https://maps.geoapify.com/v1/embed?lat=${lat}&lon=${lon}&zoom=14.5&apiKey=${GEOAPIFY_KEY}`;
+    const staticMapUrl = `https://maps.geoapify.com/v1/embed?lat=${lat}&lon=${lon}&zoom=14.5&apiKey=${GEOAPIFY_KEY}`;
 
     const data = {
         name: finalProps.name ?? name,
