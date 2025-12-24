@@ -54,9 +54,8 @@ export default function Signup() {
     }) => {
         try {
             await registerApi(values.name, values.email, values.password);
-            navigate('/signup-status?status=email-unconfirmed', {
-                state: { email: values.email },
-            });
+            // Đăng ký thành công -> navigate về trang chủ (user đã được auto login)
+            navigate('/');
         } catch (err: any) {
             console.error("Register Error:", err);
             if (err?.code === "email-existed") {

@@ -129,6 +129,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             password,
             options: {
                 data: { name },
+                emailRedirectTo: undefined, // Không cần email confirmation
             },
         });
         if (error) {
@@ -143,8 +144,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             tempError.code = "email-existed";
             throw tempError;
         }
-        if (sUser) {
-            createUser(sUser.id, sUser.user_metadata.name, sUser.user_metadata.email, sUser.created_at)
+
+        if (sUser && data.session) {
+            // Tạo user trong backend
+            await createUser(sUser.id, sUser.user_metadata.name, sUser.user_metadata.email, sUser.created_at);
+
+            // Set user state với access_token để auto login
             setUser({
                 id: sUser.id,
                 name: (name && name.trim()) || sUser.email || 'User',
@@ -152,6 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 avatar: sUser.user_metadata?.avatar ?? 'https://avatar.iran.liara.run/public/4',
                 createdAt: sUser.created_at,
                 role: 'guest',
+                access_token: data.session.access_token,
             });
         }
     };
