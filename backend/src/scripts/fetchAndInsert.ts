@@ -144,7 +144,7 @@ async function buildPlaceData(name: string) {
         avg_sentiment_score: generateRandomSentiment(),
         lat,
         lon,
-        embed_map_url: embedMapUrl,
+        static_map_url: staticMapUrl,
         created_at: new Date().toISOString(),
         reviews: 0,
     };

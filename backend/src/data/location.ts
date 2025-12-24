@@ -35,7 +35,7 @@ export interface InsertedDestination {
     description: string;
     lat: number;
     lon: number;
-    embed_map_url: string;
+    static_map_url: string;
     is_featured?: boolean;
     active?: boolean;
     rating?: number;

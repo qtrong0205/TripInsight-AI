@@ -22,7 +22,7 @@ export interface Destination {
     description: string;
     duration: string;
     reviewsList: Review[];
-    embed_map_url: string
+    static_map_url: string
 }
 
 export interface DestinationFilters {

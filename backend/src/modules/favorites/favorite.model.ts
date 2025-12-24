@@ -34,7 +34,7 @@ export const favoriteModel = {
                 categories,
                 avg_sentiment_score,
                 reviews,
-                embed_map_url,
+                static_map_url,
                 active
             )
             `)

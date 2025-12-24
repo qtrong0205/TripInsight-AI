@@ -38,16 +38,6 @@ export default function DestinationDetails() {
         setRating(newRating);
     };
 
-    const staticMapUrl = `
-  https://maps.geoapify.com/v1/staticmap?
-  style=osm-carto&
-  center=lonlat:${destination?.lon},${destination?.lat}&
-  zoom=14&
-  width=600&
-  height=300&
-  apiKey=${import.meta.env.VITE_GEOAPIFY_KEY}
-`.replace(/\s+/g, '');
-
     if (isLoading) {
         return (
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center text-muted-foreground">
@@ -287,15 +277,13 @@ export default function DestinationDetails() {
                         {/* Map Card */}
                         <Card className="bg-card border-border overflow-hidden">
                             <CardContent className="p-0">
-                                <iframe
-                                    src={staticMapUrl}
+                                <img
+                                    src={destination.static_map_url}
                                     width="100%"
                                     height="300"
-                                    style={{ border: 0 }}
-                                    allowFullScreen
+                                    alt={`Map of ${destination.name}`}
+                                    className="object-cover"
                                     loading="lazy"
-                                    referrerPolicy="no-referrer-when-downgrade"
-                                    title={`Map of ${destination.name}`}
                                 />
                             </CardContent>
                         </Card>

@@ -76,7 +76,7 @@ export const locationService = {
             categories: input.categories ?? [],
             lat: input.lat,
             lon: input.lon,
-            embed_map_url: input.staticMapUrl,
+            static_map_url: input.staticMapUrl,
             is_featured: input.isFeatured ?? false,
             active: input.active ?? true,
             rating: 0,
