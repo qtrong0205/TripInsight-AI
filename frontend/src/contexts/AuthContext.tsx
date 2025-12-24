@@ -2,9 +2,11 @@ import { useState, useEffect, ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
 import { AuthContext, User, AuthContextType } from './ContextBase';
 
+const backendUrl = import.meta.env.VITE_BACKEND_URL
+
 const createUser = async (id: string, name: string, email: string, createdAt: string) => {
     try {
-        const response = await fetch("http://localhost:3000/api/auth", {
+        const response = await fetch(`${backendUrl}/auth`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -43,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 return;
             }
 
-            const res = await fetch('http://localhost:3000/api/auth/me', {
+            const res = await fetch(`${backendUrl}/auth/me`, {
                 headers: {
                     Authorization: `Bearer ${session.access_token}`,
                     Accept: 'application/json',

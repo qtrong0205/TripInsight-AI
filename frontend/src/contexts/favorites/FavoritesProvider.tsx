@@ -2,6 +2,8 @@ import { ReactNode, useEffect, useState } from 'react';
 import { FavoritesContext, FavoritesContextType, Favorite } from './FavoritesContext';
 import { useAuth } from '../useAuth';
 
+const backendUrl = import.meta.env.VITE_BACKEND_URL
+
 export function FavoritesProvider({ children }: { children: ReactNode }) {
     const { user } = useAuth();
     const [favorites, setFavorites] = useState<Favorite[]>([]);
@@ -9,7 +11,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     const fetchFavorites = async () => {
         if (!user?.access_token) return;
         try {
-            const response = await fetch('http://localhost:3000/api/favorites', {
+            const response = await fetch(`${backendUrl}/favorites`, {
                 headers: {
                     Authorization: `Bearer ${user.access_token}`,
                 },
@@ -30,7 +32,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     const addFavorite: FavoritesContextType['addFavorite'] = (placeId: string) => {
         const addFavorite = async () => {
             try {
-                const response = await fetch('http://localhost:3000/api/favorites', {
+                const response = await fetch(`${backendUrl}/favorites`, {
                     method: "POST",
                     headers: {
                         'Content-Type': 'application/json',
@@ -57,7 +59,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
         setFavorites((prev) => prev.filter((fav) => fav.place_id !== placeId));
         const addFavorite = async () => {
             try {
-                const response = await fetch(`http://localhost:3000/api/favorites/${placeId}`, {
+                const response = await fetch(`${backendUrl}/favorites/${placeId}`, {
                     method: "DELETE",
                     headers: {
                         'Content-Type': 'application/json',
