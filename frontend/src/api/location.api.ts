@@ -1,4 +1,4 @@
-import { DestinationFilters } from "../data/destinations";
+import { DataToInsert, DestinationFilters } from "../data/destinations";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL
 
@@ -85,3 +85,21 @@ export const getLocationStat = async ({ queryKey }) => {
 
     return res.json();
 };
+
+export const createPlaceApi = async (data: DataToInsert, token: string) => {
+    const res = await fetch(`${backendUrl}/locations/admin/new`, {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+    })
+
+    if (!res.ok) {
+        throw new Error("Failed to create location")
+    }
+
+    return res.json()
+}
+

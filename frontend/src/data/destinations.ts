@@ -31,3 +31,13 @@ export interface DestinationFilters {
     sentimentScore?: number;
     sort?: "newest" | "popular" | "rating";
 }
+
+export interface DataToInsert {
+    name: string;
+    location: string;
+    description: string;
+    images: string[];
+    categories: string[];
+    isFeatured?: boolean;
+    active?: boolean;
+}

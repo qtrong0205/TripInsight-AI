@@ -1,6 +1,6 @@
-import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
-import { fetchLocations, getLocationById, getLocationStat } from "../api/location.api";
-import { DestinationFilters } from "../data/destinations";
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { createPlaceApi, fetchLocations, getLocationById, getLocationStat } from "../api/location.api";
+import { DataToInsert, DestinationFilters } from "../data/destinations";
 
 export const useLocationQuery = (placeId?: string | null) => {
     return useQuery({
@@ -35,5 +35,17 @@ export const useLocationStat = (token: string) => {
         queryKey: ["location-stat", token],
         queryFn: getLocationStat,
         select: (res: any) => (res?.data ?? res),
+    })
+}
+
+export const useCreatePlace = () => {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: ({ data, token }: { data: DataToInsert; token: string }) =>
+            createPlaceApi(data, token),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['places'] })
+        }
     })
 }

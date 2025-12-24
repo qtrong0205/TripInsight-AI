@@ -9,6 +9,10 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { supabase } from '../../lib/supabase';
+import { DataToInsert } from '../../data/destinations';
+import { useCreatePlace } from '../../hooks/location.queries';
+import { useAuth } from '../../contexts/useAuth';
 
 type ImageSource = 'upload' | 'url';
 
@@ -17,6 +21,7 @@ interface ImageItem {
     url: string;
     source: ImageSource;
     name?: string;
+    file?: File;
 }
 
 const destinationSchema = z.object({
@@ -27,14 +32,52 @@ const destinationSchema = z.object({
 
 type DestinationFormData = z.infer<typeof destinationSchema>;
 
+const uploadImage = async (file: File): Promise<string | null> => {
+    try {
+        const fileExt = file.name.split(".").pop();
+        const fileName = `${crypto.randomUUID()}.${fileExt}`;
+        // Chỉ dùng fileName, không cần thêm folder vì bucket đã là "places"
+        const filePath = fileName;
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
+            .from("places")
+            .upload(filePath, file, {
+                cacheControl: '3600',
+                upsert: false
+            });
+
+        if (uploadError) {
+            console.error('Upload error:', uploadError);
+            return null;
+        }
+
+        const { data } = supabase.storage
+            .from("places")
+            .getPublicUrl(filePath);
+
+        return data.publicUrl;
+    } catch (error) {
+        console.error('Upload exception:', error);
+        return null;
+    }
+};
+
+
 export default function DestinationForm() {
     const navigate = useNavigate();
+    const { user } = useAuth();
+    const accessToken = user?.access_token ?? '';
+
     const [featured, setFeatured] = useState(false);
+    const [active, setActive] = useState(true);
     const [images, setImages] = useState<ImageItem[]>([]);
     const [imageInputMethod, setImageInputMethod] = useState<'upload' | 'url'>('upload');
     const [imageUrl, setImageUrl] = useState('');
-    const [categories, setCategories] = useState([])
+    const [categories, setCategories] = useState<string[]>([]);
     const [urlError, setUrlError] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const createPlaceMutation = useCreatePlace()
 
     const categoriesList = ['Beach', 'Mountain', 'City', 'Cultural', 'Adventure', 'Nature']
 
@@ -84,6 +127,7 @@ export default function DestinationForm() {
             url: URL.createObjectURL(file),
             source: 'upload' as ImageSource,
             name: file.name,
+            file: file
         }));
 
         setImages([...images, ...newImages]);
@@ -98,7 +142,6 @@ export default function DestinationForm() {
             return;
         }
 
-        // Basic URL format validation (accepts any valid URL)
         try {
             new URL(imageUrl);
         } catch {
@@ -132,12 +175,75 @@ export default function DestinationForm() {
         }
     };
 
-    const onSubmit = (data: DestinationFormData) => {
-        console.log('Form data:', data);
-        console.log('Images:', images);
-        console.log('Featured:', featured);
-        console.log('categories', categories)
-        alert("Form submitted successfully!");
+    const onSubmit = async (data: DestinationFormData) => {
+        if (!accessToken) {
+            alert("Bạn cần đăng nhập để thực hiện thao tác này.");
+            return;
+        }
+
+        setIsSubmitting(true);
+
+        try {
+            // Upload images
+            const imageUrls: string[] = [];
+            for (const img of images) {
+                if (img.source === 'upload' && img.file) {
+                    const url = await uploadImage(img.file);
+                    if (url) {
+                        imageUrls.push(url);
+                    } else {
+                        console.error('Failed to upload image:', img.name);
+                    }
+                }
+
+                if (img.source === 'url') {
+                    imageUrls.push(img.url);
+                }
+            }
+
+            if (imageUrls.length === 0 && images.length > 0) {
+                alert("Lỗi khi upload ảnh. Vui lòng thử lại.");
+                setIsSubmitting(false);
+                return;
+            }
+
+            // Build data object
+            const dataToInsert: DataToInsert = {
+                name: data.name,
+                location: data.location,
+                description: data.description,
+                images: imageUrls,
+                categories: categories,
+                isFeatured: featured,
+                active: active,
+            };
+
+            console.log('Data to insert:', dataToInsert);
+
+            createPlaceMutation.mutate(
+                {
+                    data: dataToInsert,
+                    token: accessToken,
+                },
+                {
+                    onSuccess: () => {
+                        alert("Thêm điểm đến thành công!");
+                        navigate('/admin/destinations');
+                    },
+                    onError: (error) => {
+                        console.error('Mutation error:', error);
+                        alert("Có lỗi xảy ra khi thêm điểm đến. Vui lòng thử lại.");
+                    },
+                    onSettled: () => {
+                        setIsSubmitting(false);
+                    }
+                }
+            );
+        } catch (error) {
+            console.error('Submit error:', error);
+            alert("Có lỗi xảy ra. Vui lòng thử lại.");
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -495,9 +601,13 @@ export default function DestinationForm() {
 
                                     <div className="pt-4 border-t border-gray-100">
                                         <Label className="text-gray-700 font-medium mb-2 block">Status</Label>
-                                        <select className="w-full h-11 px-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                            <option>Active</option>
-                                            <option>Inactive</option>
+                                        <select
+                                            value={active ? 'active' : 'inactive'}
+                                            onChange={(e) => setActive(e.target.value === 'active')}
+                                            className="w-full h-11 px-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        >
+                                            <option value="active">Active</option>
+                                            <option value="inactive">Inactive</option>
                                         </select>
                                     </div>
                                 </CardContent>
@@ -530,13 +640,15 @@ export default function DestinationForm() {
                             <div className="space-y-3">
                                 <Button
                                     type="submit"
-                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white h-11 shadow-sm"
+                                    disabled={isSubmitting}
+                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white h-11 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    Publish Destination
+                                    {isSubmitting ? 'Publishing...' : 'Publish Destination'}
                                 </Button>
                                 <Button
                                     type="button"
                                     variant="ghost"
+                                    disabled={isSubmitting}
                                     onClick={() => navigate('/admin/destinations')}
                                     className="w-full text-gray-600 hover:text-gray-900 hover:bg-gray-100 h-11"
                                 >
