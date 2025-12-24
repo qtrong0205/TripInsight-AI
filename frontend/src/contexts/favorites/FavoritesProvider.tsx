@@ -26,6 +26,10 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     };
 
     useEffect(() => {
+        if (!user) {
+            setFavorites([]);
+            return;
+        }
         fetchFavorites();
     }, [user]);
 
