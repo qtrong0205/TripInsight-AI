@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/useAuth';
-import { useLocationStat } from '../../hooks/location.queries';
+import { useLocationsAdmin, useLocationStat } from '../../hooks/location.queries';
 
 interface StatInterface {
     active: number;
@@ -30,7 +30,7 @@ export default function AdminDashboard() {
         }
     }, [user, navigate]);
 
-    const { data, isLoading, error } = useLocationStat(
+    const { data: statData, isLoading: statLoading, error: statError } = useLocationStat(
         user?.access_token
     ) as {
         data: StatInterface | undefined;
@@ -38,8 +38,10 @@ export default function AdminDashboard() {
         error: unknown;
     };
 
+    const { data: locationsData, isLoading: locationsLoading, error: locationsError } = useLocationsAdmin(user?.access_token, 1, 4)
+
     // Show loading state while user or data is loading
-    if (!user || isLoading) {
+    if (!user || statLoading || locationsLoading) {
         return (
             <div className="pt-20 md:pt-2 min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="text-center">
@@ -51,7 +53,7 @@ export default function AdminDashboard() {
     }
 
     // Show error state
-    if (error) {
+    if (statError || locationsError) {
         return (
             <div className="pt-20 md:pt-2 min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="text-center text-red-600">
@@ -64,22 +66,22 @@ export default function AdminDashboard() {
     const stats = [
         {
             title: 'Total Destinations',
-            value: data?.total ?? 0,
-            change: `+${data?.monthlyChange ?? 0} this month`,
+            value: statData?.total ?? 0,
+            change: `+${statData?.monthlyChange ?? 0} this month`,
             icon: MapPin,
             color: 'text-blue-600',
             bgColor: 'bg-blue-50',
         },
         {
             title: 'Featured Destinations',
-            value: data?.featured ?? 0,
+            value: statData?.featured ?? 0,
             icon: Star,
             color: 'text-amber-600',
             bgColor: 'bg-amber-50',
         },
         {
             title: 'Recently Added',
-            value: data?.recent ?? 0,
+            value: statData?.recent ?? 0,
             change: 'Last 7 days',
             icon: TrendingUp,
             color: 'text-emerald-600',
@@ -87,12 +89,17 @@ export default function AdminDashboard() {
         },
     ];
 
-    const recentDestinations = [
-        { name: 'Santorini Sunset Tour', location: 'Greece', status: 'Active', date: '2024-03-20' },
-        { name: 'Tokyo Night Markets', location: 'Japan', status: 'Active', date: '2024-03-19' },
-        { name: 'Swiss Alps Adventure', location: 'Switzerland', status: 'Inactive', date: '2024-03-18' },
-        { name: 'Bali Beach Resort', location: 'Indonesia', status: 'Active', date: '2024-03-17' },
-    ];
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        return date.toISOString().split('T')[0]; // yyyy-mm-dd
+    };
+
+    const recentDestinations = (Array.isArray(locationsData) ? locationsData : []).slice(0, 4).map((item: any) => ({
+        name: item.name,
+        location: item.location,
+        status: item.active ? "Active" : "Inactive",
+        date: formatDate(item.created_at),
+    }));
 
     return (
         <div className="pt-20 md:pt-2 min-h-screen bg-gray-50">
@@ -192,19 +199,19 @@ export default function AdminDashboard() {
                                 <div>
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-sm font-medium text-gray-600">Active Destinations</span>
-                                        <span className="text-sm font-bold text-gray-900">{data?.active ?? 0}</span>
+                                        <span className="text-sm font-bold text-gray-900">{statData?.active ?? 0}</span>
                                     </div>
                                     <div className="w-full bg-gray-100 rounded-full h-2">
-                                        <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${data?.active ?? 0}%` }}></div>
+                                        <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${statData?.active ?? 0}%` }}></div>
                                     </div>
                                 </div>
                                 <div>
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-sm font-medium text-gray-600">Inactive Destinations</span>
-                                        <span className="text-sm font-bold text-gray-900">{data?.inactive ?? 0}</span>
+                                        <span className="text-sm font-bold text-gray-900">{statData?.inactive ?? 0}</span>
                                     </div>
                                     <div className="w-full bg-gray-100 rounded-full h-2">
-                                        <div className="bg-amber-500 h-2 rounded-full" style={{ width: `${data?.inactive ?? 0}%` }}></div>
+                                        <div className="bg-amber-500 h-2 rounded-full" style={{ width: `${statData?.inactive ?? 0}%` }}></div>
                                     </div>
                                 </div>
                                 <div className="pt-4 border-t border-gray-100">

@@ -86,6 +86,31 @@ export const getLocationStat = async ({ queryKey }) => {
     return res.json();
 };
 
+export const getLocationsAdmin = async ({
+    token,
+    page = 1,
+    limit = 10,
+}) => {
+    if (!token) throw new Error("Missing access token");
+
+    const res = await fetch(
+        `${backendUrl}/locations/admin?page=${page}&limit=${limit}`,
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+        }
+    );
+
+    if (!res.ok) {
+        throw new Error("Failed to fetch admin locations");
+    }
+
+    return res.json();
+};
+
+
 export const createPlaceApi = async (data: DataToInsert, token: string) => {
     const res = await fetch(`${backendUrl}/locations/admin/new`, {
         method: "POST",
