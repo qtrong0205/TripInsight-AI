@@ -33,6 +33,51 @@ export const locationController = {
             });
         }
     },
+    getAdminLocations: async (req: Request, res: Response) => {
+        try {
+            const page = Math.max(parseInt(String(req.query.page ?? "1")) || 1, 1);
+            const limit = Math.min(parseInt(String(req.query.limit ?? "10")) || 10, 100);
+
+            const {
+                categories,
+                rating,
+                sentimentScore,
+                sort,
+                active,
+            } = req.query;
+
+            const result = await locationService.getAdminLocations(page, limit, {
+                categories: Array.isArray(categories)
+                    ? categories.join(",")
+                    : (categories as string | undefined),
+
+                rating: rating ? parseFloat(String(rating)) : undefined,
+
+                sentimentScore: sentimentScore
+                    ? parseFloat(String(sentimentScore))
+                    : undefined,
+
+                sort: sort as "newest" | "popular" | "rating" | undefined,
+
+                // 👉 ADMIN ONLY
+                active:
+                    active !== undefined
+                        ? active === "true"
+                        : undefined,
+            });
+
+            res.status(200).json({
+                success: true,
+                ...result,
+            });
+        } catch (error: any) {
+            res.status(400).json({
+                success: false,
+                message: error.message,
+            });
+        }
+    },
+
     getLocationById: async (req: Request, res: Response) => {
         try {
             const id = req.params.id;

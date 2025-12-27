@@ -1,5 +1,6 @@
 import { searchPlaceGeoapify } from "./geoapify.service";
 import supabase from "../config/supabase";
+import { DestinationFilters } from "../data/location";
 
 interface PlaceLocationResult {
     lat: number;
@@ -123,3 +124,59 @@ export function buildStaticMapUrl(lat: number, lon: number) {
 
     return `https://maps.geoapify.com/v1/staticmap?${params.toString()}`;
 }
+
+export const buildPlacesQuery = (
+    filters: DestinationFilters,
+    isAdmin = false
+) => {
+    let query = supabase
+        .from("places")
+        .select("*", { count: "exact" });
+
+    if (!isAdmin) {
+        query = query.eq("active", true);
+    } else if (filters?.active !== undefined) {
+        query = query.eq("active", filters.active);
+    }
+
+    if (filters?.categories) {
+        query = query.overlaps("categories", filters.categories.split(","));
+    }
+
+    if (filters?.sentimentScore !== undefined) {
+        query = query.gte("avg_sentiment_score", filters.sentimentScore);
+    }
+
+    if (filters?.rating !== undefined) {
+        query = query.gte("rating", filters.rating);
+    }
+
+    switch (filters?.sort) {
+        case "popular":
+            query = query.order("reviews", { ascending: false });
+            break;
+        case "rating":
+            query = query.order("rating", { ascending: false });
+            break;
+        default:
+            query = query.order("created_at", { ascending: false });
+    }
+
+    return query;
+};
+
+
+export const getRange = (page: number, limit: number) => {
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+    return { from, to };
+};
+
+
+export const getPageInfo = (page: number, limit: number, total: number) => {
+    const hasMore = page * limit < total;
+    return {
+        hasMore,
+        nextPage: hasMore ? page + 1 : null,
+    };
+};

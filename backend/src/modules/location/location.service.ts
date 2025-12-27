@@ -1,18 +1,18 @@
 import { DestinationFilters, InsertedDestination } from "../../data/location";
 import { locationModel } from "./location.model";
-import { generateUniqueSlug } from "../../service/place.service";
+import { generateUniqueSlug, getPageInfo, getRange } from "../../service/place.service";
 
 export const locationService = {
     getAllLocations: async (page: number, limit: number, filters: DestinationFilters) => {
-        const from = (page - 1) * limit;
-        const to = from + limit - 1;
+        const { from, to } = getRange(page, limit);
 
         const { data, count } = await locationModel.getAllLocations(from, to, filters);
 
         if (!data) throw new Error("Failed to fetch");
 
-        const hasMore = to + 1 < (count ?? 0);
-        const nextPage = hasMore ? page + 1 : null;
+        const total = count ?? 0;
+
+        const { hasMore, nextPage } = getPageInfo(page, limit, total);
 
         return {
             data,
@@ -21,7 +21,29 @@ export const locationService = {
             total: count,
         };
     },
+    getAdminLocations: async (
+        page: number,
+        limit: number,
+        filters: DestinationFilters
+    ) => {
+        const { from, to } = getRange(page, limit);
 
+        const { data, count } =
+            await locationModel.getAdminLocations(from, to, filters);
+
+        if (!data) throw new Error("Failed to fetch");
+
+        const total = count ?? 0;
+
+        const { hasMore, nextPage } = getPageInfo(page, limit, total);
+
+        return {
+            data,
+            hasMore,
+            nextPage,
+            total: count,
+        };
+    },
     getLocationById: async (id: string) => {
         if (!id) throw new Error('Place id is required');
         const data = await locationModel.getLocationById(id)

@@ -1,41 +1,25 @@
 import supabase from "../../config/supabase";
 import { DestinationFilters, InsertedDestination } from "../../data/location";
+import { buildPlacesQuery } from "../../service/place.service";
 
 export const locationModel = {
     getAllLocations: async (from: number, to: number, filters: DestinationFilters) => {
-        let query = supabase
-            .from("places")
-            .select("*", { count: "exact" })
-            .eq("active", true);
+        const query = buildPlacesQuery(filters, false);
 
-        // filter
-        if (filters?.categories) {
-            const categoriesArr = filters.categories.split(",");
-            query = query.overlaps("categories", categoriesArr);
-        }
+        const { data, count, error } = await query.range(from, to);
 
+        if (error) throw error;
 
-        if (filters?.sentimentScore !== undefined) {
-            query = query.gte("avg_sentiment_score", filters.sentimentScore);
-        }
+        return { data, count };
+    },
+    getAdminLocations: async (
+        from: number,
+        to: number,
+        filters: DestinationFilters
+    ) => {
+        const query = buildPlacesQuery(filters, true);
 
-        if (filters?.rating !== undefined) {
-            query = query.gte("rating", filters.rating);
-        }
-
-        // sort
-        switch (filters?.sort) {
-            case "popular":
-                query = query.order("reviews", { ascending: false });
-                break;
-            case "rating":
-                query = query.order("rating", { ascending: false });
-                break;
-            default:
-                query = query.order("created_at", { ascending: false });
-        }
-
-        const { data, error, count } = await query.range(from, to);
+        const { data, count, error } = await query.range(from, to);
 
         if (error) throw error;
 

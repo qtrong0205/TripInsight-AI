@@ -49,4 +49,6 @@ export interface DestinationFilters {
     rating?: number;
     sentimentScore?: number;
     sort?: "newest" | "popular" | "rating";
+    active?: boolean;
 }
+
