@@ -1,5 +1,5 @@
 import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { createPlaceApi, fetchLocations, getLocationById, getLocationsAdmin, getLocationStat } from "../api/location.api";
+import { AdminFilters, createPlaceApi, fetchLocations, getLocationById, getLocationsAdmin, getLocationStat } from "../api/location.api";
 import { DataToInsert, DestinationFilters } from "../data/destinations";
 
 export const useLocationQuery = (placeId?: string | null) => {
@@ -33,14 +33,19 @@ export const useLocationsInfinite = (filters: DestinationFilters) => {
 export const useLocationsAdmin = (
     token: string,
     page = 1,
-    limit = 10
+    limit = 10,
+    filters: AdminFilters = {}
 ) => {
     return useQuery({
-        queryKey: ["locations-admin", page, limit],
+        queryKey: ["locations-admin", page, limit, filters],
         queryFn: () =>
-            getLocationsAdmin({ token, page, limit }),
+            getLocationsAdmin({ token, page, limit, filters }),
         enabled: !!token,
-        select: (res: any) => (res?.data ?? res),
+        select: (res: any) => ({
+            data: res?.data ?? [],
+            total: res?.total ?? 0,
+            hasMore: res?.hasMore ?? false,
+        }),
     });
 };
 

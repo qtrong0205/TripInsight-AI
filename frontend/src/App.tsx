@@ -13,6 +13,7 @@ import EditProfile from './pages/UpdateProfile';
 import SignupFailed from './pages/SignUpFailed';
 import AdminDashboard from './pages/admin/Dashboard';
 import DestinationForm from './pages/admin/DestinationForm';
+import DestinationsManagement from './pages/admin/DestinatiosManagement';
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ function App() {
                                 <Route path="/edit-profile" element={<EditProfile />} />
                                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                                 <Route path="/admin/destinations/new" element={<DestinationForm />} />
+                                <Route path="/admin/destinations" element={<DestinationsManagement />} />
                             </Routes>
                         </AppShell>
                     </FavoritesProvider>

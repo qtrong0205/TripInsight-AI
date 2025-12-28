@@ -86,15 +86,39 @@ export const getLocationStat = async ({ queryKey }) => {
     return res.json();
 };
 
+export interface AdminFilters {
+    active?: boolean;
+    featured?: boolean;
+}
+
 export const getLocationsAdmin = async ({
     token,
     page = 1,
     limit = 10,
+    filters = {},
+}: {
+    token: string;
+    page?: number;
+    limit?: number;
+    filters?: AdminFilters;
 }) => {
     if (!token) throw new Error("Missing access token");
 
+    const params = new URLSearchParams({
+        page: String(page),
+        limit: String(limit),
+    });
+
+    if (filters.active !== undefined) {
+        params.append("active", String(filters.active));
+    }
+
+    if (filters.featured !== undefined) {
+        params.append("featured", String(filters.featured));
+    }
+
     const res = await fetch(
-        `${backendUrl}/locations/admin?page=${page}&limit=${limit}`,
+        `${backendUrl}/locations/admin?${params.toString()}`,
         {
             headers: {
                 Authorization: `Bearer ${token}`,
