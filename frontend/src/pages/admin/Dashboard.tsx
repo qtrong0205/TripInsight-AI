@@ -94,7 +94,7 @@ export default function AdminDashboard() {
         return date.toISOString().split('T')[0]; // yyyy-mm-dd
     };
 
-    const recentDestinations = (Array.isArray(locationsData) ? locationsData : []).slice(0, 4).map((item: any) => ({
+    const recentDestinations = (Array.isArray(locationsData?.data) ? locationsData.data : []).slice(0, 4).map((item: any) => ({
         name: item.name,
         location: item.location,
         status: item.active ? "Active" : "Inactive",
