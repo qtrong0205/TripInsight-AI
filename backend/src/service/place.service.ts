@@ -133,10 +133,16 @@ export const buildPlacesQuery = (
         .from("places")
         .select("*", { count: "exact" });
 
+    // Active filter
     if (!isAdmin) {
         query = query.eq("active", true);
     } else if (filters?.active !== undefined) {
         query = query.eq("active", filters.active);
+    }
+
+    // Featured filter
+    if (filters?.featured !== undefined) {
+        query = query.eq("is_featured", filters.featured);
     }
 
     if (filters?.categories) {

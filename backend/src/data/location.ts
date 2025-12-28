@@ -50,5 +50,6 @@ export interface DestinationFilters {
     sentimentScore?: number;
     sort?: "newest" | "popular" | "rating";
     active?: boolean;
+    featured?: boolean;
 }
 

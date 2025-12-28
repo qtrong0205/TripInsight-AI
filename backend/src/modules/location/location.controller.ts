@@ -44,6 +44,7 @@ export const locationController = {
                 sentimentScore,
                 sort,
                 active,
+                featured,
             } = req.query;
 
             const result = await locationService.getAdminLocations(page, limit, {
@@ -64,6 +65,10 @@ export const locationController = {
                     active !== undefined
                         ? active === "true"
                         : undefined,
+
+                featured: featured !== undefined
+                    ? featured === "true"
+                    : undefined,
             });
 
             res.status(200).json({
