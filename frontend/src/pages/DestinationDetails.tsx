@@ -175,7 +175,7 @@ export default function DestinationDetails() {
                                 <Card className="bg-card border-border">
                                     <CardContent className="p-4 text-center">
                                         <Star className="w-6 h-6 text-tertiary mx-auto mb-2" strokeWidth={2} fill="currentColor" />
-                                        <div className="font-bold text-lg text-card-foreground">{destination.rating}</div>
+                                        <div className="font-bold text-lg text-card-foreground">{parseFloat(destination.rating).toFixed(1)}</div>
                                         <div className="text-sm text-muted-foreground">Rating</div>
                                     </CardContent>
                                 </Card>
@@ -196,7 +196,7 @@ export default function DestinationDetails() {
                                 <Card className="bg-card border-border">
                                     <CardContent className="p-4 text-center">
                                         <Brain className="w-6 h-6 text-primary mx-auto mb-2" strokeWidth={2} />
-                                        <div className="font-bold text-lg text-card-foreground">{destination.avg_sentiment_score}</div>
+                                        <div className="font-bold text-lg text-card-foreground">{Math.round(destination.avg_sentiment_score)}</div>
                                         <div className="text-sm text-muted-foreground">AI Sentiment Score</div>
                                     </CardContent>
                                 </Card>
@@ -285,25 +285,6 @@ export default function DestinationDetails() {
                                     className="object-cover"
                                     loading="lazy"
                                 />
-                            </CardContent>
-                        </Card>
-
-                        {/* Booking Card */}
-                        <Card className="bg-card border-border">
-                            <CardContent className="p-6 space-y-4">
-                                <div className="text-center">
-                                    <div className="text-3xl font-bold text-card-foreground mb-1">${destination.price}</div>
-                                    <div className="text-sm text-muted-foreground">per person</div>
-                                </div>
-                                <Button className="w-full bg-primary text-primary-foreground hover:bg-secondary">
-                                    Book Now
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    className="w-full bg-background text-foreground border-border hover:bg-neutral hover:text-foreground"
-                                >
-                                    Contact Us
-                                </Button>
                             </CardContent>
                         </Card>
                     </div>
