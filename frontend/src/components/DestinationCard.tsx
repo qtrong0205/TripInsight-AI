@@ -84,14 +84,14 @@ export default function DestinationCard({ destination }: DestinationCardProps) {
                         <div className="flex justify-start items-center gap-3 my-1">
                             <span className="text-gray-600 dark:text-gray-400">AI Sentiment Score</span>
                             <div className={`px-2 py-1 rounded-full ${getSentimentColor(destination.avg_sentiment_score)}`}>
-                                <span className="text-lg">{destination.avg_sentiment_score}</span>
+                                <span className="text-lg">{Math.round(destination.avg_sentiment_score)}</span>
                             </div>
                         </div>
                     </div>
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-1 text-xs sm:text-sm">
                             <Star className="w-4 h-4 text-tertiary" strokeWidth={2} fill="currentColor" />
-                            <span className="font-medium text-card-foreground">{destination.rating}</span>
+                            <span className="font-medium text-card-foreground">{parseFloat(destination.rating).toFixed(1)}</span>
                             <span className="text-muted-foreground">({destination.reviews})</span>
                         </div>
                     </div>
