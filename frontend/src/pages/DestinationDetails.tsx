@@ -10,7 +10,7 @@ import ReviewCard from '../components/ReviewCard';
 import DestinationCard from '../components/DestinationCard';
 import type { Destination } from '../data/destinations';
 import { useFavorites } from '../contexts/favorites/useFavorites';
-import { useLocationQuery } from '../hooks/location.queries';
+import { useLocationQuery, useReview } from '../hooks/location.queries';
 
 export default function DestinationDetails() {
     const [rating, setRating] = useState(0);
@@ -22,13 +22,13 @@ export default function DestinationDetails() {
 
     const params = new URLSearchParams(location.search);
     const placeId = params.get('place_id');
-    const { data, isLoading, error } = useLocationQuery(placeId);
-    const destination = (data?.location?.data as Destination | undefined);
-    const similar: Destination[] = Array.isArray(data?.similar?.data)
-        ? (data!.similar.data as Destination[])
-        : Array.isArray(data?.similar)
-            ? (data!.similar as Destination[])
-            : [];
+    const { data: locationData, isLoading, error } = useLocationQuery(placeId);
+    const { data: reviewData, isLoading: reviewLoading, error: reviewError } = useReview(placeId);
+    const destination = (locationData?.location?.data as Destination | undefined);
+    const similar: Destination[] = Array.isArray(locationData?.similar?.data)
+        ? (locationData!.similar.data as Destination[])
+        : [];
+    const reviewsList = reviewData?.data
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -216,11 +216,11 @@ export default function DestinationDetails() {
                         {/* Reviews Section */}
                         <div>
                             <h2 className="text-2xl font-bold text-foreground mb-6">Reviews</h2>
-                            {/* <div className="space-y-4 mb-8">
-                                {destination.reviewsList.map((review) => (
-                                    <ReviewCard key={review.id} review={review} />
+                            <div className="space-y-4 mb-8">
+                                {reviewsList.map((review) => (
+                                    <ReviewCard key={review.review_id} review={review} />
                                 ))}
-                            </div> */}
+                            </div>
 
                             {/* Write Review */}
                             <Card className="bg-card border-border">

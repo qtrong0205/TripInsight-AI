@@ -91,6 +91,11 @@ export interface AdminFilters {
     featured?: boolean;
 }
 
+export interface ReviewContent {
+    content: string;
+    star: number
+}
+
 export const getLocationsAdmin = async ({
     token,
     page = 1,
@@ -151,4 +156,17 @@ export const createPlaceApi = async (data: DataToInsert, token: string) => {
 
     return res.json()
 }
+
+export const getReviewsByPlaceId = async (placeId: string) => {
+    if (!placeId) {
+        throw Error("Missing place ID")
+    }
+    const res = await fetch(`${backendUrl}/reviews/${placeId}`)
+
+    if (!res.ok) {
+        throw new Error("Failed to fetch reviews");
+    }
+
+    return res.json();
+};
 

@@ -1,10 +1,19 @@
-export interface Review {
+export interface ReviewUser {
     id: string;
-    userName: string;
-    avatar: string;
-    rating: number;
-    date: string;
-    comment: string;
+    username: string;
+    avatar: string | null;
+}
+
+export interface Review {
+    review_id: string;
+    place_id: string;
+    users_id: string;
+    content: string;
+    stars: number;
+    score: number;
+    created_at: string;
+    updated_at: string;
+    users: ReviewUser;
 }
 
 export interface Destination {
