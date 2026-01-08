@@ -53,3 +53,8 @@ export interface DestinationFilters {
     featured?: boolean;
 }
 
+export interface ReviewContent {
+    content: string;
+    star: number;
+}
+

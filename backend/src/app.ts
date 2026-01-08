@@ -3,6 +3,7 @@ import cors from "cors";
 import locationRouter from './modules/location/location.route'
 import authRouter from './modules/auth/auth.route'
 import favoriteRouter from './modules/favorites/favorite.route'
+import reviewRouter from './modules/reviews/review.route'
 
 const app = express()
 app.use(express.json())
@@ -19,5 +20,6 @@ app.use(cors({
 app.use("/api/locations", locationRouter)
 app.use("/api/auth", authRouter)
 app.use("/api/favorites", favoriteRouter)
+app.use("/api/reviews", reviewRouter)
 
 export default app
