@@ -170,3 +170,20 @@ export const getReviewsByPlaceId = async (placeId: string) => {
     return res.json();
 };
 
+export const createReviewApi = async (data: ReviewContent, token: string, placeId: string) => {
+    const res = await fetch(`${backendUrl}/reviews/${placeId}`, {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+    })
+
+    if (!res.ok) {
+        throw new Error("Failed to create review")
+    }
+
+    return res.json()
+}
+

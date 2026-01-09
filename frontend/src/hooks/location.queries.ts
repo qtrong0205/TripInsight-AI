@@ -1,5 +1,5 @@
 import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { AdminFilters, createPlaceApi, createReview, fetchLocations, getLocationById, getLocationsAdmin, getLocationStat, getReviewsByPlaceId } from "../api/location.api";
+import { AdminFilters, createPlaceApi, createReviewApi, fetchLocations, getLocationById, getLocationsAdmin, getLocationStat, getReviewsByPlaceId, ReviewContent } from "../api/location.api";
 import { DataToInsert, DestinationFilters } from "../data/destinations";
 
 export const useLocationQuery = (placeId?: string | null) => {
@@ -59,6 +59,18 @@ export const useReview = (placeId: string) => {
         }),
     });
 };
+
+export const useCreateReview = () => {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: ({ data, token, placeId }: { data: ReviewContent; token: string; placeId: string }) =>
+            createReviewApi(data, token, placeId),
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({ queryKey: ['reviews', variables.placeId] })
+        }
+    })
+}
 
 export const useLocationStat = (token: string) => {
     return useQuery({

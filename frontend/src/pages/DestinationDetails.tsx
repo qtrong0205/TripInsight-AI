@@ -10,7 +10,9 @@ import ReviewCard from '../components/ReviewCard';
 import DestinationCard from '../components/DestinationCard';
 import type { Destination } from '../data/destinations';
 import { useFavorites } from '../contexts/favorites/useFavorites';
-import { useLocationQuery, useReview } from '../hooks/location.queries';
+import { useLocationQuery, useReview, useCreateReview } from '../hooks/location.queries';
+import ReviewForm, { ReviewFormData } from '../components/ReviewForm';
+import { useAuth } from '../contexts/useAuth';
 
 export default function DestinationDetails() {
     const [rating, setRating] = useState(0);
@@ -19,11 +21,14 @@ export default function DestinationDetails() {
     const navigate = useNavigate();
     const { favorites, addFavorite, removeFavorite } = useFavorites();
     const [newReview, setNewReview] = useState('');
+    const { user } = useAuth();
 
     const params = new URLSearchParams(location.search);
     const placeId = params.get('place_id');
     const { data: locationData, isLoading, error } = useLocationQuery(placeId);
     const { data: reviewData, isLoading: reviewLoading, error: reviewError } = useReview(placeId);
+    const { mutate: createReview, isPending: isSubmittingReview } = useCreateReview();
+
     const destination = (locationData?.location?.data as Destination | undefined);
     const similar: Destination[] = Array.isArray(locationData?.similar?.data)
         ? (locationData!.similar.data as Destination[])
@@ -79,10 +84,20 @@ export default function DestinationDetails() {
         }
     };
 
-    const handleReviewSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        setNewReview('');
-        alert('Thank you for your review!');
+    const handleReviewSubmit = (data: ReviewFormData) => {
+        if (!user?.access_token || !placeId) {
+            navigate('/login');
+            return;
+        }
+
+        createReview({
+            data: {
+                content: data.content,
+                star: data.stars,
+            },
+            token: user.access_token,
+            placeId: placeId,
+        });
     };
 
     return (
@@ -223,52 +238,7 @@ export default function DestinationDetails() {
                             </div>
 
                             {/* Write Review */}
-                            <Card className="bg-card border-border">
-                                <CardContent className="p-6">
-                                    <label className="block text-gray-700 dark:text-gray-300 mb-2">
-                                        Your Review *
-                                    </label>
-                                    <div className="flex space-x-1 mb-2">
-                                        {Array.from({ length: 5 }).map((_, i) => (
-                                            <button
-                                                key={i}
-                                                onClick={() => handleRatingChange(i + 1)}
-                                                className="focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
-                                            >
-                                                <Star
-                                                    className="w-6 h-6 text-tertiary cursor-pointer transition-transform hover:scale-110"
-                                                    strokeWidth={2}
-                                                    fill={i < rating ? 'currentColor' : 'none'}
-                                                />
-                                            </button>
-                                        ))}
-                                    </div>
-                                    <h3 className="font-semibold text-lg text-card-foreground mb-4">Write a Review</h3>
-                                    <form onSubmit={handleReviewSubmit} className="space-y-4">
-                                        <Textarea
-                                            placeholder="Share your experience..."
-                                            value={newReview}
-                                            onChange={(e) => setNewReview(e.target.value)}
-                                            className="min-h-32 bg-background text-foreground border-border"
-                                        />
-                                        <div className="flex items-start gap-3 p-4 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="#2563EB" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
-                                            </svg>
-
-                                            <p className="text-blue-800 dark:text-blue-300">
-                                                The AI ​​system will analyze your review to determine how positive or negative it is and score it on a 100-point scale. *
-                                            </p>
-                                        </div>
-                                        <Button
-                                            type="submit"
-                                            className="bg-primary text-primary-foreground hover:bg-secondary"
-                                        >
-                                            Submit Review
-                                        </Button>
-                                    </form>
-                                </CardContent>
-                            </Card>
+                            <ReviewForm onSubmit={handleReviewSubmit} isLoading={isSubmittingReview} />
                         </div>
                     </div>
 
@@ -289,24 +259,26 @@ export default function DestinationDetails() {
                         </Card>
                     </div>
                 </div>
-            </section>
+            </section >
 
             {/* Similar Destinations */}
-            {similar.length > 0 && (
-                <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 bg-neutral">
-                    <h2 className="text-3xl font-bold text-foreground mb-8">Similar Destinations</h2>
-                    <ScrollArea className="w-full">
-                        <div className="flex space-x-6 pb-4">
-                            {similar.map((dest: Destination) => (
-                                <div key={dest.id} className="w-80 flex-shrink-0">
-                                    <DestinationCard destination={dest} />
-                                </div>
-                            ))}
-                        </div>
-                        <ScrollBar orientation="horizontal" />
-                    </ScrollArea>
-                </section>
-            )}
-        </div>
+            {
+                similar.length > 0 && (
+                    <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 bg-neutral">
+                        <h2 className="text-3xl font-bold text-foreground mb-8">Similar Destinations</h2>
+                        <ScrollArea className="w-full">
+                            <div className="flex space-x-6 pb-4">
+                                {similar.map((dest: Destination) => (
+                                    <div key={dest.id} className="w-80 flex-shrink-0">
+                                        <DestinationCard destination={dest} />
+                                    </div>
+                                ))}
+                            </div>
+                            <ScrollBar orientation="horizontal" />
+                        </ScrollArea>
+                    </section>
+                )
+            }
+        </div >
     );
 }
